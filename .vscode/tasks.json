@@ -4,6 +4,28 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "compile",
+      "dependsOn": ["npm: compile"],
+      "presentation": {
+        "reveal": "never"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "type": "npm",
+      "script": "compile",
+      "group": "build",
+      "problemMatcher": "$esbuild",
+      "label": "npm: compile",
+      "presentation": {
+        "group": "compile",
+        "reveal": "never"
+      }
+    },
+    {
       "label": "watch",
       "dependsOn": ["npm: watch:tsc", "npm: watch:esbuild"],
       "presentation": {
@@ -11,7 +33,7 @@
       },
       "group": {
         "kind": "build",
-        "isDefault": true
+        "isDefault": false
       }
     },
     {

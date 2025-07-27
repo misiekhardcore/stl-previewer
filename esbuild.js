@@ -21,6 +21,15 @@ const esbuildProblemMatcherPlugin = {
           `    ${location.file}:${location.line}:${location.column}:`
         );
       });
+      copyFile(
+        `${__dirname}/src/media/main.css`,
+        `${__dirname}/dist/media/main.css`,
+        (err) => {
+          if (err) {
+            console.error("[ERROR] Failed to copy main.css:", err);
+          }
+        }
+      );
       console.log("[watch] build finished");
     });
   },
