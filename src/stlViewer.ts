@@ -4,7 +4,7 @@ import { Preview } from "./preview";
 export class StlViewer implements vscode.CustomReadonlyEditorProvider {
   public static readonly viewType = "stlViewer.previewEditor";
 
-  private readonly _previews = new Set<Preview>();
+  private readonly _previews = new Map<string, Preview>();
 
   constructor(private readonly extensionRoot: vscode.Uri) {}
 
@@ -16,15 +16,19 @@ export class StlViewer implements vscode.CustomReadonlyEditorProvider {
     document: vscode.CustomDocument,
     webviewEditor: vscode.WebviewPanel
   ): Promise<void> {
-    const preview = new Preview(
-      this.extensionRoot,
-      document.uri,
-      webviewEditor
-    );
-    this._previews.add(preview);
+    const fsPath = document.uri.fsPath;
+
+    if (!this._previews.has(fsPath)) {
+      const preview = new Preview(
+        this.extensionRoot,
+        document.uri,
+        webviewEditor
+      );
+      this._previews.set(fsPath, preview);
+    }
 
     webviewEditor.onDidDispose(() => {
-      this._previews.delete(preview);
+      this._previews.delete(fsPath);
     });
   }
 }

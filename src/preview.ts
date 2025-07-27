@@ -151,7 +151,7 @@ export class Preview extends Disposable {
     JSON.stringify(settings)
   )}">
   <link rel="stylesheet" type="text/css" href="${escapeAttribute(
-    this.extensionResource("/out/media/main.css")
+    this.extensionResource("/dist/media/main.css")
   )}">
 </head>
 <body>
@@ -165,7 +165,7 @@ export class Preview extends Disposable {
     </div>
   </div>
 	<script src="${escapeAttribute(
-    this.extensionResource("/out/media/main.js")
+    this.extensionResource("/dist/media/main.js")
   )}" nonce="${nonce}"></script>
 </body>
 </html>`;

@@ -124,7 +124,7 @@
   },
   "activationEvents": [
     "onLanguage:stl",
-    "onView:stl-diff-viewer.previewEditor"
+    "onView:stlViewer.previewEditor"
   ],
   "engines": {
     "vscode": "^1.52.0"
