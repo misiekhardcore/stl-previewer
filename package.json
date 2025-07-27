@@ -1,23 +1,24 @@
 {
-  "name": "vscode-stl-viewer",
+  "name": "stl-viewer",
   "version": "0.3.0",
-  "description": "",
+  "description": "VSCode extension to preview STL files and visualize diffs.",
+  "icon": "icons/icon-128.png",
   "main": "./out/extension.js",
-  "publisher": "mtsmfm",
+  "publisher": "misiekhardcore",
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "esbuild src/extension.ts src/media/main.ts --bundle --outdir=out --external:vscode --sourcemap --platform=node && cp -rf src/media/main.css out/media/main.css"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mtsmfm/vscode-stl-viewer.git"
+    "url": "git+https://github.com/misiekhardcore/stl-viewer.git"
   },
-  "author": "Fumiaki MATSUSHIMA",
+  "author": "misiekhardcore",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mtsmfm/vscode-stl-viewer/issues"
+    "url": "https://github.com/misiekhardcore/stl-viewer/issues"
   },
-  "homepage": "https://github.com/mtsmfm/vscode-stl-viewer#readme",
+  "homepage": "https://github.com/misiekhardcore/stl-viewer#readme",
   "devDependencies": {
     "@types/node": "^16.11.4",
     "@types/three": "^0.133.1",
