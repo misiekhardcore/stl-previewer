@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import { TrackballControls } from "three/examples/jsm/controls/TrackballControls";
-import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
-import { degToRad, radToDeg } from "three/src/math/MathUtils";
+import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js";
+import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
+import { degToRad, radToDeg } from "three/src/math/MathUtils.js";
 import { Settings } from "../preview";
 import { base64ToArrayBuffer } from "./utils";
 
@@ -22,7 +22,7 @@ const viewerElement = document.getElementById("viewer")!;
 // functions
 
 function getSettings(): Settings {
-  if (settings != null) {
+  if (settings) {
     return settings;
   }
 
@@ -42,7 +42,7 @@ function getSettings(): Settings {
 function setRenderer() {
   const { width, height } = viewerElement.getBoundingClientRect();
   const renderer = new THREE.WebGLRenderer();
-  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.setSize(width, height);
 
   return renderer;
@@ -57,11 +57,16 @@ function setScene() {
 
 function setCamera(cameraPosition?: State["cameraPosition"]) {
   const { width, height } = viewerElement.getBoundingClientRect();
-  const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    width / height,
+    0.1,
+    1000
+  );
 
   camera.up = new THREE.Vector3(0, 0, 1);
 
-  if (cameraPosition != null) {
+  if (cameraPosition) {
     camera.position.x = cameraPosition.x;
     camera.position.y = cameraPosition.y;
     camera.position.z = cameraPosition.z;
@@ -98,7 +103,11 @@ function setCameraPosition(
       );
       break;
     case "right":
-      camera.position.set(boundingBox.max.x + viewOffset, 0, dimensions.z / 2);
+      camera.position.set(
+        boundingBox.max.x + viewOffset,
+        0,
+        dimensions.z / 2
+      );
       break;
     case "bottom":
       // DEV: for some reason, 0 messes up the view, to investigate further
@@ -107,7 +116,8 @@ function setCameraPosition(
     case "isometric":
     default:
       // find the biggest dimension so we can offset it
-      let dimension = dimensions.z > dimensions.x ? dimensions.z : dimensions.x;
+      let dimension =
+        dimensions.z > dimensions.x ? dimensions.z : dimensions.x;
       dimension = boundingBox.max.z;
 
       camera.position.set(
@@ -187,16 +197,21 @@ function setGrid(
       ) / 5
     ) * 10;
 
-  const color = gridConfig.color == null ? "#111" : gridConfig.color;
+  const color = !gridConfig.color ? "#111" : gridConfig.color;
   const gridHelper = new THREE.GridHelper(size, size / 5, color, color);
   scene.add(gridHelper.rotateX(degToRad(90)));
 
   return gridHelper;
 }
 
-function setMesh(scene: ReturnType<typeof setScene>, settings: Settings) {
+function setMesh(
+  scene: ReturnType<typeof setScene>,
+  settings: Settings
+) {
   const loader = new STLLoader();
-  const geometry = loader.parse(base64ToArrayBuffer(getSettings().data));
+  const geometry = loader.parse(
+    base64ToArrayBuffer(getSettings().data)
+  );
   const material = setMaterial(settings.meshMaterial);
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
@@ -232,7 +247,10 @@ function setExtras(
   }
 
   if (showBoundingBox) {
-    const meshBoxHelper = new THREE.Box3Helper(boundingBox, 0xffff00 as any);
+    const meshBoxHelper = new THREE.Box3Helper(
+      boundingBox,
+      0xffff00 as any
+    );
     scene.add(meshBoxHelper);
   }
 
@@ -246,7 +264,8 @@ function setExtras(
     infoText.style.left = "0";
     viewerElement.appendChild(infoText);
 
-    const roundDecimals = (num: number): number => Math.round(num * 100) / 100;
+    const roundDecimals = (num: number): number =>
+      Math.round(num * 100) / 100;
 
     const updateDebug = () => {
       const debugData = {
@@ -282,7 +301,7 @@ function setExtras(
 function setStateManager() {
   return {
     getState: (): State => {
-      return WEBVIEW_STATE == null ? {} : WEBVIEW_STATE;
+      return !!WEBVIEW_STATE ? WEBVIEW_STATE : {};
     },
     setState: (s: State) => {
       WEBVIEW_API.setState(s);
@@ -343,7 +362,7 @@ function init() {
 
   const controls = setControls(renderer, camera, mesh);
 
-  if (state.cameraPosition == null) {
+  if (!state.cameraPosition) {
     setCameraPosition(camera, controls, "isometric", mesh);
   }
 
