@@ -115,7 +115,8 @@
     "vscode": "^1.52.0"
   },
   "dependencies": {
-    "three": "^0.178.0"
+    "three": "^0.178.0",
+    "three-bvh-csg": "^0.0.17"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",

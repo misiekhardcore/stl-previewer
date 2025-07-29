@@ -1,4 +1,5 @@
 import { ContentService } from "../content-service";
+import { CSGService } from "../csg-service";
 import { RenderService, RenderState } from "../render-service";
 import { PreviewData } from "../types/preview";
 import { createInfoBox } from "./info-box";
@@ -38,9 +39,23 @@ function init() {
   );
 
   const camera = rendererService.getCamera();
-  const [mesh] = rendererService.getMeshes();
+  const meshes = rendererService.getMeshes();
 
-  const boundingBox = rendererService.getMeshBoundingBox(mesh);
+  if (meshes.length !== 2) {
+    rendererService.renderObject(...meshes);
+  } else {
+    const csgService = new CSGService(
+      meshes[0].geometry,
+      meshes[1].geometry,
+      settings.meshMaterial
+    );
+    const { added, removed, intersection } = csgService.getDiff();
+    added && rendererService.renderObject(added);
+    removed && rendererService.renderObject(removed);
+    intersection && rendererService.renderObject(intersection);
+  }
+
+  const boundingBox = rendererService.getMeshBoundingBox(meshes[0]);
   const dimensions =
     rendererService.getBoundingBoxDimensions(boundingBox);
 

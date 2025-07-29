@@ -16,6 +16,7 @@ import {
   MeshLambertMaterial,
   Color,
   Mesh,
+  Object3D,
 } from "three";
 import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
@@ -224,13 +225,15 @@ export class RenderService {
   private createLights = () => {
     const lights = [new HemisphereLight(0xffffbb, 0xf0f0f0, 2.5)];
     for (let i = 0; i < lights.length; i += 1) {
-      this.scene.add(lights[i]);
+      this.renderObject(lights[i]);
     }
 
     return lights;
   };
 
-  private getMaterial = (materialConfig: MeshMaterialSettings) => {
+  public static getMaterial = (
+    materialConfig: MeshMaterialSettings
+  ) => {
     switch (materialConfig.type) {
       case MeshMaterialType.BASIC:
         return new MeshBasicMaterial(materialConfig.config);
@@ -261,7 +264,7 @@ export class RenderService {
 
     const color = !settings.grid.color ? "#111" : settings.grid.color;
     const gridHelper = new GridHelper(size, size / 5, color, color);
-    this.scene.add(gridHelper.rotateX(degToRad(90)));
+    this.renderObject(gridHelper.rotateX(degToRad(90)));
 
     return gridHelper;
   };
@@ -278,7 +281,7 @@ export class RenderService {
     );
 
     const meshes = geometries.map((g) => {
-      const material = this.getMaterial({
+      const material = RenderService.getMaterial({
         ...settings.meshMaterial,
         config: {
           ...settings.meshMaterial.config,
@@ -291,9 +294,12 @@ export class RenderService {
       });
       return new Mesh(g, material);
     });
-    meshes.forEach((m) => this.scene.add(m));
 
     return meshes;
+  };
+
+  renderObject = (...objects: Object3D[]) => {
+    this.scene.add(...objects);
   };
 
   getMeshBoundingBox = (mesh: Mesh) => {
@@ -321,12 +327,12 @@ export class RenderService {
         ) * 10;
 
       const axesHelper = new AxesHelper(size);
-      this.scene.add(axesHelper);
+      this.renderObject(axesHelper);
     }
 
     if (settings.view.showBoundingBox) {
       const meshBoxHelper = new Box3Helper(boundingBox, 0xffff00);
-      this.scene.add(meshBoxHelper);
+      this.renderObject(meshBoxHelper);
     }
   };
 
