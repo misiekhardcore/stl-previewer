@@ -14,13 +14,13 @@ export abstract class Disposable {
 
   protected _disposables: vscode.Disposable[] = [];
 
-  public dispose(): any {
+  public dispose = () => {
     if (this._isDisposed) {
       return;
     }
     this._isDisposed = true;
     disposeAll(this._disposables);
-  }
+  };
 
   protected _register<T extends vscode.Disposable>(value: T): T {
     if (this._isDisposed) {
