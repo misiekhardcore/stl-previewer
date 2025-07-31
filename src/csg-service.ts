@@ -8,6 +8,12 @@ import {
 import { MeshMaterialSettings } from "./types/settings";
 import { RenderService } from "./render-service";
 
+type DiffResult = {
+  added: Brush | null;
+  removed: Brush | null;
+  intersection: Brush | null;
+};
+
 export class CSGService {
   static operations = {
     SUBTRACTION,
@@ -31,21 +37,20 @@ export class CSGService {
     if (!firstSolid && !secondSolid) {
       throw new Error("No solids provided for diff calculation.");
     }
-
-    this.setUv(firstSolid);
-    this.setUv(secondSolid);
-
     this.evaluator = new Evaluator();
-    this.firstBrush = firstSolid ? new Brush(firstSolid) : null;
-    this.secondBrush = secondSolid ? new Brush(secondSolid) : null;
+
+    if (firstSolid) {
+      this.setUv(firstSolid);
+      this.firstBrush = new Brush(firstSolid);
+    }
+    if (secondSolid) {
+      this.setUv(secondSolid);
+      this.secondBrush = new Brush(secondSolid);
+    }
   }
 
-  private setUv(geometry: BufferGeometry | null) {
-    if (!geometry) {
-      return;
-    }
-
-    geometry.setAttribute(
+  private setUv(geometry: BufferGeometry) {
+    geometry?.setAttribute(
       "uv",
       new BufferAttribute(new Float32Array([]), 1)
     );
@@ -61,8 +66,8 @@ export class CSGService {
     }
 
     const result = this.evaluator.evaluate(
-      this.firstBrush,
       this.secondBrush,
+      this.firstBrush,
       CSGService.operations.SUBTRACTION
     );
     return new Brush(result.geometry, material);
@@ -78,8 +83,8 @@ export class CSGService {
     }
 
     const result = this.evaluator.evaluate(
-      this.secondBrush,
       this.firstBrush,
+      this.secondBrush,
       CSGService.operations.SUBTRACTION
     );
     return new Brush(result.geometry, material);
@@ -98,16 +103,19 @@ export class CSGService {
     return new Brush(result.geometry, material);
   }
 
-  getDiff(): {
-    added: Brush | null;
-    removed: Brush | null;
-    intersection: Brush | null;
-  } {
+  private hasBothBrushes(): boolean {
+    return !!this.firstBrush && !!this.secondBrush;
+  }
+
+  getDiff(): DiffResult {
+    const opacity = this.hasBothBrushes() ? 0.5 : 1;
     const addedMaterial = this.createColoredMaterial(
-      CSGService.colors.ADDED
+      CSGService.colors.ADDED,
+      opacity
     );
     const removedMaterial = this.createColoredMaterial(
-      CSGService.colors.REMOVED
+      CSGService.colors.REMOVED,
+      opacity
     );
     const intersectionMaterial = this.createColoredMaterial(
       CSGService.colors.INTERSECTION
@@ -120,15 +128,18 @@ export class CSGService {
     };
   }
 
-  private createColoredMaterial(color: string): Material {
+  private createColoredMaterial(
+    color: string,
+    opacity: number = 0.5
+  ): Material {
     return RenderService.getMaterial({
       ...this.meshMaterial,
       config: {
         ...this.meshMaterial.config,
         // @ts-expect-error color type mismatch
         color,
-        opacity: 0.5,
-        transparent: true,
+        opacity,
+        transparent: opacity < 1,
       },
     });
   }

@@ -9,6 +9,7 @@ import {
   AxesHelper,
   Box3Helper,
   HemisphereLight,
+  DirectionalLight,
   MeshBasicMaterial,
   MeshStandardMaterial,
   MeshNormalMaterial,
@@ -17,6 +18,8 @@ import {
   Color,
   Mesh,
   Object3D,
+  PCFSoftShadowMap,
+  Light,
 } from "three";
 import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
@@ -38,12 +41,21 @@ export interface RenderState {
 }
 
 export class RenderService {
+  static colors = {
+    BACKGROUND: 0xa9b5bf,
+    SKY: 0xa9b5bf,
+    DEFAULT: 0x999999,
+    GRID: 0x111111,
+    LIGHT: 0xffffff,
+  };
+
   private scene: Scene;
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
   private controls: TrackballControls;
-  private lights: HemisphereLight[];
+  private lights: Light[];
   private meshes: Mesh[];
+  private loader: STLLoader;
 
   constructor(
     private readonly viewerElement: HTMLElement,
@@ -51,6 +63,7 @@ export class RenderService {
     private readonly data: string[],
     private readonly settings: Settings
   ) {
+    this.loader = new STLLoader();
     this.renderer = this.createRenderer();
     this.viewerElement.appendChild(this.renderer.domElement);
 
@@ -103,13 +116,15 @@ export class RenderService {
     });
     renderer.outputColorSpace = SRGBColorSpace;
     renderer.setSize(width, height);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = PCFSoftShadowMap;
 
     return renderer;
   };
 
   private createScene = () => {
     const scene = new Scene();
-    scene.background = new Color(0xa9b5bf);
+    scene.background = new Color(RenderService.colors.BACKGROUND);
 
     return scene;
   };
@@ -223,9 +238,22 @@ export class RenderService {
   };
 
   private createLights = () => {
-    const lights = [new HemisphereLight(0xffffbb, 0xf0f0f0, 2.5)];
+    const hemisphereLight = new HemisphereLight(
+      RenderService.colors.SKY,
+      RenderService.colors.BACKGROUND,
+      0.6
+    );
+    const directionalLight = new DirectionalLight(
+      RenderService.colors.LIGHT,
+      1
+    );
+    directionalLight.position.set(10, 10, 10);
+    directionalLight.castShadow = true;
+
+    const lights = [hemisphereLight, directionalLight];
+
     for (let i = 0; i < lights.length; i += 1) {
-      this.renderObject(lights[i]);
+      this.scene.add(lights[i]);
     }
 
     return lights;
@@ -262,7 +290,9 @@ export class RenderService {
         ) / 5
       ) * 10;
 
-    const color = !settings.grid.color ? "#111" : settings.grid.color;
+    const color = !settings.grid.color
+      ? RenderService.colors.GRID
+      : settings.grid.color;
     const gridHelper = new GridHelper(size, size / 5, color, color);
     this.renderObject(gridHelper.rotateX(degToRad(90)));
 
@@ -273,29 +303,45 @@ export class RenderService {
     `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
   private createMeshes = () => {
-    const loader = new STLLoader();
-    const settings = this.getSettings();
     const data = this.getData();
-    const geometries = data.map((d) =>
-      loader.parse(ContentService.base64ToArrayBuffer(d))
+    const geometries = data.map((dataItem) =>
+      this.loader.parse(ContentService.base64ToArrayBuffer(dataItem))
     );
 
-    const meshes = geometries.map((g) => {
-      const material = RenderService.getMaterial({
-        ...settings.meshMaterial,
-        config: {
-          ...settings.meshMaterial.config,
-          // @ts-expect-error color type mismatch
-          color:
-            geometries.length > 1 ? this.getRandomColor() : undefined,
-          transparent: geometries.length > 1,
-          opacity: geometries.length > 1 ? 0.5 : 1,
-        },
-      });
-      return new Mesh(g, material);
+    const meshes = geometries.map((geometry) => {
+      // Center the geometry to origin (0,0,0) before creating the mesh
+      geometry.center();
+
+      const material = RenderService.getMaterial(
+        this.getMaterialConfig()
+      );
+      const mesh = new Mesh(geometry, material);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      return mesh;
     });
 
     return meshes;
+  };
+
+  private getMaterialConfig = (): MeshMaterialSettings => {
+    const dataCount = this.getData().length;
+    const settings = this.getSettings();
+
+    return {
+      ...settings.meshMaterial,
+      config: {
+        ...settings.meshMaterial.config,
+        // @ts-expect-error color type mismatch
+        color:
+          dataCount > 1
+            ? this.getRandomColor()
+            : RenderService.colors.DEFAULT,
+        transparent: dataCount > 1,
+        opacity: dataCount > 1 ? 0.5 : 1,
+      },
+    };
   };
 
   renderObject = (...objects: Object3D[]) => {

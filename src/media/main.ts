@@ -1,6 +1,7 @@
 import { ContentService } from "../content-service";
 import { CSGService } from "../csg-service";
 import { RenderService, RenderState } from "../render-service";
+import { Status } from "../types/git";
 import { PreviewData } from "../types/preview";
 import { createInfoBox } from "./info-box";
 
@@ -30,7 +31,7 @@ function getPreviewData(): PreviewData {
 }
 
 function init() {
-  const { settings, data } = getPreviewData();
+  const { settings, data, diffStatus } = getPreviewData();
   const rendererService = new RenderService(
     viewerElement,
     WEBVIEW_API,
@@ -40,15 +41,30 @@ function init() {
 
   const camera = rendererService.getCamera();
   const meshes = rendererService.getMeshes();
+  let csgService: CSGService;
 
-  if (meshes.length !== 2) {
+  if (diffStatus === undefined) {
     rendererService.renderObject(...meshes);
   } else {
-    const csgService = new CSGService(
-      meshes[0].geometry,
-      meshes[1].geometry,
-      settings.meshMaterial
-    );
+    const [oldMesh, newMesh] = meshes;
+    oldMesh.geometry.center();
+    newMesh?.geometry.center();
+    if (
+      diffStatus === Status.ADDED ||
+      diffStatus === Status.INDEX_ADDED
+    ) {
+      csgService = new CSGService(
+        null,
+        oldMesh?.geometry,
+        settings.meshMaterial
+      );
+    } else {
+      csgService = new CSGService(
+        oldMesh?.geometry,
+        newMesh?.geometry ?? null,
+        settings.meshMaterial
+      );
+    }
     const { added, removed, intersection } = csgService.getDiff();
     added && rendererService.renderObject(added);
     removed && rendererService.renderObject(removed);

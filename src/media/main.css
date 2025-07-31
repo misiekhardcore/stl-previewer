@@ -6,6 +6,12 @@ body {
   height: 100%;
 }
 
+.button {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  cursor: pointer;
+}
+
 #viewer {
   width: 100%;
   height: 100%;
@@ -20,8 +26,8 @@ body {
 
 #info-box {
   position: absolute;
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
   padding: 20px;
   top: 0;
   left: 0;

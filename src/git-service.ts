@@ -1,7 +1,12 @@
 import * as vscode from "vscode";
 import { relative } from "path";
 
-import type { API, GitExtension, Repository } from "./types/git";
+import type {
+  API,
+  GitExtension,
+  Repository,
+  Status,
+} from "./types/git";
 import { ContentService } from "./content-service";
 
 type Query = {
@@ -10,7 +15,7 @@ type Query = {
 };
 
 export class GitService {
-  private api: API;
+  api: API;
 
   constructor() {
     const gitExtension =
@@ -37,6 +42,36 @@ export class GitService {
     );
 
     return fileBuffer;
+  };
+
+  getStatus = async (uri: vscode.Uri): Promise<Status | undefined> => {
+    const workingTreeStatus = await this.getWorkingTreeStatus(uri);
+
+    if (workingTreeStatus !== undefined) {
+      return workingTreeStatus;
+    }
+    const indexStatus = await this.getIndexStatus(uri);
+
+    return indexStatus;
+  };
+
+  getWorkingTreeStatus = async (
+    uri: vscode.Uri
+  ): Promise<Status | undefined> => {
+    const workingTreeChanges = await this.getRepository().state
+      .workingTreeChanges;
+    return workingTreeChanges.find(
+      (change) => change.uri.fsPath === uri.fsPath
+    )?.status;
+  };
+
+  getIndexStatus = async (
+    uri: vscode.Uri
+  ): Promise<Status | undefined> => {
+    const indexChanges = await this.getRepository().state.indexChanges;
+    return indexChanges.find(
+      (change) => change.uri.fsPath === uri.fsPath
+    )?.status;
   };
 
   isGitRepository = (uri: vscode.Uri): boolean => {

@@ -1,5 +1,4 @@
-import { Uri, Event, Disposable, ProviderResult } from "vscode";
-export { ProviderResult } from "vscode";
+import type { Disposable, Event, ProviderResult, Uri } from "vscode";
 
 export interface Git {
   readonly path: string;
@@ -62,25 +61,25 @@ export interface Remote {
 }
 
 export const enum Status {
-  INDEX_MODIFIED,
-  INDEX_ADDED,
-  INDEX_DELETED,
-  INDEX_RENAMED,
-  INDEX_COPIED,
+  INDEX_MODIFIED = 0,
+  INDEX_ADDED = 1,
+  INDEX_DELETED = 2,
+  INDEX_RENAMED = 3,
 
-  MODIFIED,
-  DELETED,
-  UNTRACKED,
-  IGNORED,
-  INTENT_TO_ADD,
+  MODIFIED = 5,
+  DELETED = 6,
+  ADDED = 7,
+  UNTRACKED = 8,
+  IGNORED = 9,
+  INTENT_TO_ADD = 10,
 
-  ADDED_BY_US,
-  ADDED_BY_THEM,
-  DELETED_BY_US,
-  DELETED_BY_THEM,
-  BOTH_ADDED,
-  BOTH_DELETED,
-  BOTH_MODIFIED,
+  ADDED_BY_US = 11,
+  ADDED_BY_THEM = 12,
+  DELETED_BY_US = 13,
+  DELETED_BY_THEM = 14,
+  BOTH_ADDED = 15,
+  BOTH_DELETED = 16,
+  BOTH_MODIFIED = 17,
 }
 
 export interface Change {

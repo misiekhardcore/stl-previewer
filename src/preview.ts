@@ -108,11 +108,18 @@ export class Preview extends Disposable {
     }
   };
 
+  private getDiffStatus = async () => {
+    return (
+      await Promise.all(this.fileUris.map(this.gitService.getStatus))
+    ).find((status) => status !== undefined);
+  };
+
   private getPreviewData = async (): Promise<PreviewData> => {
     const settings = this.configService.getSettings();
     const data = await this.parseData();
+    const diffStatus = await this.getDiffStatus();
 
-    return { settings, data };
+    return { settings, data, diffStatus };
   };
 
   private parseData = async (): Promise<string[]> => {
@@ -160,7 +167,7 @@ export class Preview extends Disposable {
       <button class="button button--bottom">Bottom</button>
     </div>
   </div>
-	<script src="${ContentService.escapeAttribute(
+	<script type="module" src="${ContentService.escapeAttribute(
     this.getResourceUri(Preview.JS_PATH)
   )}" nonce="${nonce}"></script>
 </body>
