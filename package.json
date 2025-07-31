@@ -1,6 +1,6 @@
 {
-  "name": "stl-viewer",
-  "version": "0.3.0",
+  "name": "stl-previewer",
+  "version": "0.4.0",
   "description": "VSCode extension to preview STL files and visualize diffs.",
   "icon": "icons/icon-128.png",
   "main": "./dist/extension.js",
@@ -26,19 +26,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/misiekhardcore/stl-viewer.git"
+    "url": "git+https://github.com/misiekhardcore/stl-previewer.git"
   },
   "author": "misiekhardcore",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/misiekhardcore/stl-viewer/issues"
+    "url": "https://github.com/misiekhardcore/stl-previewer/issues"
   },
-  "homepage": "https://github.com/misiekhardcore/stl-viewer#readme",
+  "homepage": "https://github.com/misiekhardcore/stl-previewer#readme",
   "contributes": {
     "customEditors": [
       {
-        "viewType": "stlViewer.previewEditor",
-        "displayName": "STL Viewer",
+        "viewType": "stlPreviewer.previewEditor",
+        "displayName": "STL Previewer",
         "selector": [
           {
             "filenamePattern": "*.stl"
@@ -47,44 +47,44 @@
       }
     ],
     "configuration": {
-      "title": "STL Viewer",
+      "title": "STL Previewer",
       "properties": {
-        "stlViewer.showViewButtons": {
+        "stlPreviewer.showViewButtons": {
           "type": "boolean",
           "default": true,
           "description": "Shows buttons to control camera position"
         },
-        "stlViewer.viewOffset": {
+        "stlPreviewer.viewOffset": {
           "type": "number",
           "default": 40,
           "description": "Offset of the view when using view buttons"
         },
-        "stlViewer.showInfo": {
+        "stlPreviewer.showInfo": {
           "type": "boolean",
           "default": false,
           "description": "Shows data related to the object and view"
         },
-        "stlViewer.showAxes": {
+        "stlPreviewer.showAxes": {
           "type": "boolean",
           "default": false,
           "description": "Shows view axes"
         },
-        "stlViewer.showBoundingBox": {
+        "stlPreviewer.showBoundingBox": {
           "type": "boolean",
           "default": false,
           "description": "Shows object bounding box"
         },
-        "stlViewer.showGrid": {
+        "stlPreviewer.showGrid": {
           "type": "boolean",
           "default": true,
           "description": "Show grid"
         },
-        "stlViewer.gridColor": {
+        "stlPreviewer.gridColor": {
           "type": "string",
           "default": "#111",
           "description": "Color to be used on the grid"
         },
-        "stlViewer.meshMaterialType": {
+        "stlPreviewer.meshMaterialType": {
           "type": "string",
           "default": "lambert",
           "description": "Type of material. It can be basic, standard, lambert, normal or phong",
@@ -96,7 +96,7 @@
             "phong"
           ]
         },
-        "stlViewer.meshMaterialConfig": {
+        "stlPreviewer.meshMaterialConfig": {
           "type": [
             "object",
             null
@@ -109,7 +109,7 @@
   },
   "activationEvents": [
     "onLanguage:stl",
-    "onView:stlViewer.previewEditor"
+    "onView:stlPreviewer.previewEditor"
   ],
   "engines": {
     "vscode": "^1.52.0"

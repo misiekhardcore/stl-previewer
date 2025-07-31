@@ -10,7 +10,7 @@ import { GitService } from "./git-service";
 import { SettingsService } from "./settings-service";
 import { EXTENSION_NAME } from "./constants";
 
-export class StlViewer implements CustomReadonlyEditorProvider {
+export class StlPreviewer implements CustomReadonlyEditorProvider {
   public static readonly viewType = `${EXTENSION_NAME}.previewEditor`;
 
   private readonly _previews = new Map<string, Preview>();
