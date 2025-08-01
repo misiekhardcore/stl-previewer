@@ -1,20 +1,11 @@
 import * as vscode from "vscode";
 import { relative } from "path";
 
-import type {
-  API,
-  GitExtension,
-  Repository,
-  Status,
-} from "./types/git";
-import { ContentService } from "./content-service";
-
-type Query = {
-  path: string;
-  ref: string;
-};
+import type { API, GitExtension, Repository } from "./types/git";
+import { Status } from "./types/git";
 
 export class GitService {
+  static readonly HEAD_REF = "HEAD";
   api: API;
 
   constructor() {
@@ -33,15 +24,17 @@ export class GitService {
   public getPrevFileContent = async (
     uri: vscode.Uri
   ): Promise<Buffer<ArrayBufferLike>> => {
-    const { path, ref } = ContentService.parse<Query>(uri.query);
-    const relPath = this.getRelPath(path);
-    const sanitizedRef = this.sanitizeRef(ref);
-    const fileBuffer = await this.getRepository().buffer(
-      sanitizedRef,
-      relPath
-    );
+    const relPath = this.getRelPath(uri.fsPath);
+    try {
+      const fileBuffer = await this.getRepository().buffer(
+        GitService.HEAD_REF,
+        relPath
+      );
 
-    return fileBuffer;
+      return fileBuffer;
+    } catch (error) {
+      return Buffer.from([]);
+    }
   };
 
   getStatus = async (uri: vscode.Uri): Promise<Status | undefined> => {
@@ -74,17 +67,9 @@ export class GitService {
     )?.status;
   };
 
-  isGitRepository = (uri: vscode.Uri): boolean => {
-    return uri.scheme === "git";
-  };
-
   private getRelPath = (filePath: string): string => {
     const gitRoot = this.getGitRoot();
     return relative(gitRoot, filePath);
-  };
-
-  private sanitizeRef = (ref: string): string => {
-    return ref === "~" ? "HEAD" : ref;
   };
 
   private getRepository = (which: number = 0): Repository => {
@@ -93,5 +78,17 @@ export class GitService {
 
   private getGitRoot = (): string => {
     return this.getRepository().rootUri.fsPath;
+  };
+
+  isDeleted = (status: Status): boolean => {
+    return [Status.DELETED, Status.INDEX_DELETED].includes(status);
+  };
+
+  isAdded = (status: Status): boolean => {
+    return [Status.ADDED, Status.INDEX_ADDED].includes(status);
+  };
+
+  isModified = (status: Status): boolean => {
+    return [Status.MODIFIED, Status.INDEX_MODIFIED].includes(status);
   };
 }

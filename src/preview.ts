@@ -6,7 +6,7 @@ import { Disposable } from "./disposable";
 import { GitService } from "./git-service";
 import { SettingsService } from "./settings-service";
 import { ContentService } from "./content-service";
-import type { PreviewData } from "./types/preview";
+import type { PreviewResponse, PreviewData } from "./types/preview";
 import { WEBVIEW_DIST_PATH } from "./constants";
 
 const enum PreviewState {
@@ -21,21 +21,19 @@ export class Preview extends Disposable {
 
   constructor(
     private readonly extensionRoot: Uri,
-    private readonly fileUris: Uri[],
+    private readonly fileUri: Uri,
     private readonly webviewPanel: WebviewPanel,
     private readonly gitService: GitService,
     private readonly configService: SettingsService
   ) {
     super();
-    const resourceRoots = fileUris.map((resource) =>
-      resource.with({
-        path: resource.path.replace(/\/[^\/]+?\.\w+$/, "/"),
-      })
-    );
+    const resourceRoot = fileUri.with({
+      path: fileUri.path.replace(/\/[^\/]+?\.\w+$/, "/"),
+    });
 
     webviewPanel.webview.options = {
       enableScripts: true,
-      localResourceRoots: [...resourceRoots, extensionRoot],
+      localResourceRoots: [resourceRoot, extensionRoot],
     };
 
     this._register(
@@ -51,18 +49,12 @@ export class Preview extends Disposable {
     );
 
     const watcher = this._register(
-      workspace.createFileSystemWatcher(
-        fileUris.map((resource) => resource.fsPath).join(",")
-      )
+      workspace.createFileSystemWatcher(fileUri.fsPath)
     );
 
     this._register(
       watcher.onDidChange((e) => {
-        if (
-          this.fileUris.some(
-            (resource) => e.toString() === resource.toString()
-          )
-        ) {
+        if (e.toString() === this.fileUri.toString()) {
           this.render();
         }
       })
@@ -70,31 +62,19 @@ export class Preview extends Disposable {
 
     this._register(
       watcher.onDidDelete((e) => {
-        if (
-          this.fileUris.some(
-            (resource) => e.toString() === resource.toString()
-          )
-        ) {
+        if (e.toString() === this.fileUri.toString()) {
           this.webviewPanel.dispose();
         }
       })
     );
 
-    this.fileUris.forEach((resource) => {
-      workspace.fs.stat(resource).then(() => {
-        this.update();
-      });
+    workspace.fs.stat(this.fileUri).then(() => {
+      this.update();
     });
 
     this.render();
     this.update();
   }
-
-  public addResource = (uri: Uri) => {
-    this.fileUris.push(uri);
-    this.render();
-    this.update();
-  };
 
   private render = async () => {
     if (this._previewState !== PreviewState.Disposed) {
@@ -109,32 +89,63 @@ export class Preview extends Disposable {
   };
 
   private getDiffStatus = async () => {
-    return (
-      await Promise.all(this.fileUris.map(this.gitService.getStatus))
-    ).find((status) => status !== undefined);
+    return this.gitService.getStatus(this.fileUri);
   };
 
-  private getPreviewData = async (): Promise<PreviewData> => {
+  private getPreviewData = async (): Promise<PreviewResponse> => {
     const settings = this.configService.getSettings();
     const data = await this.parseData();
-    const diffStatus = await this.getDiffStatus();
 
-    return { settings, data, diffStatus };
+    return { settings, data };
   };
 
-  private parseData = async (): Promise<string[]> => {
-    return Promise.all(
-      this.fileUris.map((resource) => this.readFile(resource))
-    );
+  private parseData = async (): Promise<PreviewData> => {
+    const gitStatus = await this.getDiffStatus();
+
+    if (gitStatus === undefined) {
+      return {
+        prevFileContent: undefined,
+        currentFileContent: undefined,
+        fileContent: await this.readFile(this.fileUri),
+      };
+    }
+
+    switch (true) {
+      case this.gitService.isDeleted(gitStatus):
+        return {
+          prevFileContent: await this.getPrevFileContent(this.fileUri),
+          currentFileContent: undefined,
+          fileContent: undefined,
+        };
+      case this.gitService.isAdded(gitStatus):
+        return {
+          prevFileContent: undefined,
+          currentFileContent: await this.readFile(this.fileUri),
+          fileContent: undefined,
+        };
+      case this.gitService.isModified(gitStatus):
+        return {
+          prevFileContent: await this.getPrevFileContent(this.fileUri),
+          currentFileContent: await this.readFile(this.fileUri),
+          fileContent: undefined,
+        };
+      default:
+        return {
+          prevFileContent: undefined,
+          currentFileContent: undefined,
+          fileContent: await this.readFile(this.fileUri),
+        };
+    }
   };
 
   private readFile = async (uri: Uri): Promise<string> => {
-    if (this.gitService.isGitRepository(uri)) {
-      return (await this.gitService.getPrevFileContent(uri)).toString(
-        "base64"
-      );
-    }
     return readFile(uri.fsPath, { encoding: "base64" });
+  };
+
+  private getPrevFileContent = async (uri: Uri): Promise<string> => {
+    return (await this.gitService.getPrevFileContent(uri)).toString(
+      "base64"
+    );
   };
 
   private getWebviewContents = async (): Promise<string> => {

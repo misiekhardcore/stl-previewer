@@ -4,6 +4,7 @@ import {
   Brush,
   Evaluator,
   INTERSECTION,
+  ADDITION,
 } from "three-bvh-csg";
 import { MeshMaterialSettings } from "./types/settings";
 import { RenderService } from "./render-service";
@@ -12,12 +13,14 @@ type DiffResult = {
   added: Brush | null;
   removed: Brush | null;
   intersection: Brush | null;
+  sum: Brush;
 };
 
 export class CSGService {
   static operations = {
     SUBTRACTION,
     INTERSECTION,
+    ADDITION,
   };
   static colors = {
     ADDED: "#00ff00",
@@ -107,6 +110,26 @@ export class CSGService {
     return !!this.firstBrush && !!this.secondBrush;
   }
 
+  private getSum(material: Material): Brush {
+    if (!this.firstBrush && !this.secondBrush) {
+      throw new Error("No brushes provided for sum calculation.");
+    }
+
+    if (!this.firstBrush) {
+      return this.secondBrush!;
+    }
+    if (!this.secondBrush) {
+      return this.firstBrush;
+    }
+
+    const result = this.evaluator.evaluate(
+      this.firstBrush,
+      this.secondBrush,
+      CSGService.operations.ADDITION
+    );
+    return new Brush(result.geometry, material);
+  }
+
   getDiff(): DiffResult {
     const opacity = this.hasBothBrushes() ? 0.5 : 1;
     const addedMaterial = this.createColoredMaterial(
@@ -120,11 +143,13 @@ export class CSGService {
     const intersectionMaterial = this.createColoredMaterial(
       CSGService.colors.INTERSECTION
     );
+    const sumMaterial = RenderService.getMaterial(this.meshMaterial);
 
     return {
       added: this.getAddedDiff(addedMaterial),
       removed: this.getRemovedDiff(removedMaterial),
       intersection: this.getIntersection(intersectionMaterial),
+      sum: this.getSum(sumMaterial),
     };
   }
 

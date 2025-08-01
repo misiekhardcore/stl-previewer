@@ -1,6 +1,6 @@
 {
   "name": "stl-previewer",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "VSCode extension to preview STL files and visualize diffs.",
   "icon": "icons/icon-128.png",
   "main": "./dist/extension.js",
@@ -56,7 +56,7 @@
         },
         "stlPreviewer.viewOffset": {
           "type": "number",
-          "default": 40,
+          "default": 60,
           "description": "Offset of the view when using view buttons"
         },
         "stlPreviewer.showInfo": {

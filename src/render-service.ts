@@ -54,7 +54,7 @@ export class RenderService {
   private renderer: WebGLRenderer;
   private controls: TrackballControls;
   private lights: Light[];
-  private meshes: Mesh[];
+  private meshes = new Map<string, Mesh>();
   private loader: STLLoader;
 
   constructor(
@@ -72,15 +72,15 @@ export class RenderService {
       this.getStateManager().getState().cameraPosition
     );
     this.lights = this.createLights();
-    this.meshes = this.createMeshes();
+    this.createMeshes();
     this.controls = this.createControls(
       this.renderer,
       this.camera,
-      this.meshes[0]
+      this.getFirstMesh()
     );
 
     if (!this.getStateManager().getState().cameraPosition) {
-      this.setCameraPosition();
+      this.setCameraPosition({});
     }
 
     if (this.settings.grid.enable) {
@@ -98,7 +98,11 @@ export class RenderService {
 
   getScene = () => this.scene;
 
-  getMeshes = () => this.meshes;
+  hasMesh = (id: string) => this.meshes.has(id);
+
+  getMesh = (id: string) => this.meshes.get(id);
+
+  getFirstMesh = () => this.meshes.get(this.data[0])!;
 
   getLights = () => this.lights;
 
@@ -148,16 +152,21 @@ export class RenderService {
   };
 
   setCameraPosition = (
-    position:
-      | "isometric"
-      | "top"
-      | "left"
-      | "right"
-      | "bottom" = "isometric"
+    {
+      position = "isometric",
+      mesh,
+    }: {
+      position?: "isometric" | "top" | "left" | "right" | "bottom";
+      mesh?: Mesh;
+    } = {
+      position: "isometric",
+    }
   ) => {
     const { viewOffset } = this.settings.view;
 
-    const boundingBox = this.getMeshBoundingBox(this.meshes[0]);
+    const boundingBox = this.getMeshBoundingBox(
+      mesh || this.getFirstMesh()
+    );
     const dimensions = boundingBox.getSize(new Vector3(0, 0, 0));
 
     this.controls.reset();
@@ -279,7 +288,7 @@ export class RenderService {
 
   private createGrid = () => {
     const settings = this.getSettings();
-    const boundingBox = this.getMeshBoundingBox(this.meshes[0]);
+    const boundingBox = this.getMeshBoundingBox(this.getFirstMesh());
     const size =
       Math.ceil(
         Math.max(
@@ -304,11 +313,11 @@ export class RenderService {
 
   private createMeshes = () => {
     const data = this.getData();
-    const geometries = data.map((dataItem) =>
-      this.loader.parse(ContentService.base64ToArrayBuffer(dataItem))
-    );
+    data.forEach((dataItem) => {
+      const geometry = this.loader.parse(
+        ContentService.base64ToArrayBuffer(dataItem)
+      );
 
-    const meshes = geometries.map((geometry) => {
       // Center the geometry to origin (0,0,0) before creating the mesh
       geometry.center();
 
@@ -319,10 +328,8 @@ export class RenderService {
       mesh.castShadow = true;
       mesh.receiveShadow = true;
 
-      return mesh;
+      this.meshes.set(dataItem, mesh);
     });
-
-    return meshes;
   };
 
   private getMaterialConfig = (): MeshMaterialSettings => {
@@ -358,7 +365,7 @@ export class RenderService {
     boundingBox.getSize(new Vector3(0, 0, 0));
 
   private createExtras = () => {
-    const boundingBox = this.getMeshBoundingBox(this.meshes[0]);
+    const boundingBox = this.getMeshBoundingBox(this.getFirstMesh());
     const settings = this.getSettings();
 
     if (settings.view.showAxes) {

@@ -1,29 +1,22 @@
 import { ContentService } from "../content-service";
 import { CSGService } from "../csg-service";
 import { RenderService, RenderState } from "../render-service";
-import { Status } from "../types/git";
-import { PreviewData } from "../types/preview";
+import { PreviewResponse } from "../types/preview";
 import { createInfoBox } from "./info-box";
 
 const WEBVIEW_API = acquireVsCodeApi<RenderState>();
-let previewData: PreviewData;
 const viewerElement = document.getElementById("viewer")!;
 
 // -----------------------------------------
 // functions
 
-function getPreviewData(): PreviewData {
-  if (previewData) {
-    return previewData;
-  }
-
+function getPreviewData(): PreviewResponse {
   const element = document.getElementById("settings");
   if (element) {
     const data = element.getAttribute("data-settings");
     if (data) {
       // cache so we dont need to go over and over the DOM
-      previewData = ContentService.parse<PreviewData>(data);
-      return previewData;
+      return ContentService.parse<PreviewResponse>(data);
     }
   }
 
@@ -31,51 +24,45 @@ function getPreviewData(): PreviewData {
 }
 
 function init() {
-  const { settings, data, diffStatus } = getPreviewData();
+  const { settings, data } = getPreviewData();
   const rendererService = new RenderService(
     viewerElement,
     WEBVIEW_API,
-    data,
+    Object.values(data).filter((content) => content !== undefined),
     settings
   );
 
   const camera = rendererService.getCamera();
-  const meshes = rendererService.getMeshes();
   let csgService: CSGService;
+  let mesh;
 
-  if (diffStatus === undefined) {
-    rendererService.renderObject(...meshes);
+  if (data.fileContent && rendererService.hasMesh(data.fileContent)) {
+    mesh = rendererService.getMesh(data.fileContent)!;
+    rendererService.renderObject(mesh);
   } else {
-    const [oldMesh, newMesh] = meshes;
-    oldMesh.geometry.center();
+    const oldMesh = rendererService.getMesh(data.prevFileContent!);
+    const newMesh = rendererService.getMesh(data.currentFileContent!);
+    oldMesh?.geometry.center();
     newMesh?.geometry.center();
-    if (
-      diffStatus === Status.ADDED ||
-      diffStatus === Status.INDEX_ADDED
-    ) {
-      csgService = new CSGService(
-        null,
-        oldMesh?.geometry,
-        settings.meshMaterial
-      );
-    } else {
-      csgService = new CSGService(
-        oldMesh?.geometry,
-        newMesh?.geometry ?? null,
-        settings.meshMaterial
-      );
-    }
-    const { added, removed, intersection } = csgService.getDiff();
+
+    csgService = new CSGService(
+      oldMesh?.geometry ?? null,
+      newMesh?.geometry ?? null,
+      settings.meshMaterial
+    );
+
+    const { added, removed, intersection, sum } = csgService.getDiff();
     added && rendererService.renderObject(added);
     removed && rendererService.renderObject(removed);
     intersection && rendererService.renderObject(intersection);
+    mesh = sum;
   }
-
-  const boundingBox = rendererService.getMeshBoundingBox(meshes[0]);
-  const dimensions =
-    rendererService.getBoundingBoxDimensions(boundingBox);
+  rendererService.setCameraPosition({ mesh });
 
   if (settings.view.showInfo) {
+    const boundingBox = rendererService.getMeshBoundingBox(mesh);
+    const dimensions =
+      rendererService.getBoundingBoxDimensions(boundingBox);
     const infoBox = createInfoBox(camera, boundingBox, dimensions);
     viewerElement.appendChild(infoBox);
   }
@@ -94,7 +81,10 @@ function init() {
         document
           .querySelector<HTMLButtonElement>(`.button--${action}`)!
           .addEventListener("click", () => {
-            rendererService.setCameraPosition(action);
+            rendererService.setCameraPosition({
+              position: action,
+              mesh,
+            });
           });
       }
     );

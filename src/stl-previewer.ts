@@ -31,12 +31,10 @@ export class StlPreviewer implements CustomReadonlyEditorProvider {
   ): Promise<void> => {
     const { fsPath } = document.uri;
 
-    if (this._previews.has(fsPath)) {
-      this._previews.get(fsPath)?.addResource(document.uri);
-    } else {
+    if (!this._previews.has(fsPath)) {
       const preview = new Preview(
         this.extensionRoot,
-        [document.uri],
+        document.uri,
         webviewPanel,
         this.gitService,
         this.configService

@@ -1,8 +1,12 @@
-import { Status } from "./git";
 import { Settings } from "./settings";
 
 export interface PreviewData {
+  prevFileContent: string | undefined;
+  currentFileContent: string | undefined;
+  fileContent: string | undefined;
+}
+
+export interface PreviewResponse {
   settings: Settings;
-  diffStatus: Status | undefined;
-  data: string[];
+  data: PreviewData;
 }
