@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es2019",
-    "lib": ["es2019", "DOM"],
+    "lib": ["es2019", "DOM", "ESNext"],
     "sourceMap": true,
     "rootDir": "src",
     "strict": true,
@@ -12,6 +12,7 @@
     "noFallthroughCasesInSwitch": true,
     "noUnusedParameters": true,
     "noUnusedLocals": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "jsx": "react-jsx"
   }
 }

@@ -16,8 +16,8 @@ const enum PreviewState {
 
 export class Preview extends Disposable {
   private _previewState = PreviewState.Init;
-  private static readonly CSS_PATH = WEBVIEW_DIST_PATH + "/main.css";
-  private static readonly JS_PATH = WEBVIEW_DIST_PATH + "/main.js";
+  private static readonly CSS_PATH = WEBVIEW_DIST_PATH + "/index.css";
+  private static readonly JS_PATH = WEBVIEW_DIST_PATH + "/index.js";
 
   constructor(
     private readonly extensionRoot: Uri,
@@ -169,15 +169,8 @@ export class Preview extends Disposable {
   )}">
 </head>
 <body>
-  <div id="viewer">
-    <div id="actions">
-      <button class="button button--isometric">Isometric</button>
-      <button class="button button--top">Top</button>
-      <button class="button button--left">Left</button>
-      <button class="button button--right">Right</button>
-      <button class="button button--bottom">Bottom</button>
-    </div>
-  </div>
+  <div id="root"></div>
+  <div id="viewer"></div>
 	<script type="module" src="${ContentService.escapeAttribute(
     this.getResourceUri(Preview.JS_PATH)
   )}" nonce="${nonce}"></script>

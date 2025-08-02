@@ -19,12 +19,10 @@ import {
   Mesh,
   Object3D,
   PCFSoftShadowMap,
-  Light,
 } from "three";
 import { TrackballControls } from "three/examples/jsm/controls/TrackballControls.js";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 import { degToRad } from "three/src/math/MathUtils.js";
-import { WebviewApi } from "vscode-webview";
 import {
   MeshMaterialSettings,
   MeshMaterialType,
@@ -40,7 +38,14 @@ export interface RenderState {
   };
 }
 
+export interface StateManager {
+  getState: () => RenderState;
+  setState: (s: RenderState) => void;
+}
+
 export class RenderService {
+  private static instance: RenderService;
+
   static colors = {
     BACKGROUND: 0xa9b5bf,
     SKY: 0xa9b5bf,
@@ -53,13 +58,12 @@ export class RenderService {
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
   private controls: TrackballControls;
-  private lights: Light[];
   private meshes = new Map<string, Mesh>();
   private loader: STLLoader;
 
   constructor(
     private readonly viewerElement: HTMLElement,
-    private readonly webviewApi: WebviewApi<RenderState>,
+    private readonly stateManager: StateManager,
     private readonly data: string[],
     private readonly settings: Settings
   ) {
@@ -69,9 +73,9 @@ export class RenderService {
 
     this.scene = this.createScene();
     this.camera = this.createCamera(
-      this.getStateManager().getState().cameraPosition
+      this.stateManager.getState().cameraPosition
     );
-    this.lights = this.createLights();
+    this.createLights();
     this.createMeshes();
     this.controls = this.createControls(
       this.renderer,
@@ -79,7 +83,7 @@ export class RenderService {
       this.getFirstMesh()
     );
 
-    if (!this.getStateManager().getState().cameraPosition) {
+    if (!this.stateManager.getState().cameraPosition) {
       this.setCameraPosition({});
     }
 
@@ -94,23 +98,15 @@ export class RenderService {
 
   getCamera = () => this.camera;
 
-  getRenderer = () => this.renderer;
-
-  getScene = () => this.scene;
-
   hasMesh = (id: string) => this.meshes.has(id);
 
-  getMesh = (id: string) => this.meshes.get(id);
+  getMesh = (id: string) => {
+    const key = ContentService.stringToKey(id);
+    return this.meshes.get(key) ?? null;
+  };
 
-  getFirstMesh = () => this.meshes.get(this.data[0])!;
-
-  getLights = () => this.lights;
-
-  getControls = () => this.controls;
-
-  getData = () => this.data;
-
-  getSettings = () => this.settings;
+  getFirstMesh = () =>
+    this.meshes.get(ContentService.stringToKey(this.data[0]))!;
 
   private createRenderer = () => {
     const { width, height } =
@@ -164,7 +160,7 @@ export class RenderService {
   ) => {
     const { viewOffset } = this.settings.view;
 
-    const boundingBox = this.getMeshBoundingBox(
+    const boundingBox = RenderService.getBoundingBoxForMesh(
       mesh || this.getFirstMesh()
     );
     const dimensions = boundingBox.getSize(new Vector3(0, 0, 0));
@@ -235,7 +231,7 @@ export class RenderService {
     controls.panSpeed = 2;
     controls.rotateSpeed = 5;
 
-    const boundingBox = this.getMeshBoundingBox(mesh);
+    const boundingBox = RenderService.getBoundingBoxForMesh(mesh);
 
     const meshCenter = boundingBox.getCenter(new Vector3(0, 0, 0));
     camera.lookAt(meshCenter);
@@ -287,8 +283,9 @@ export class RenderService {
   };
 
   private createGrid = () => {
-    const settings = this.getSettings();
-    const boundingBox = this.getMeshBoundingBox(this.getFirstMesh());
+    const boundingBox = RenderService.getBoundingBoxForMesh(
+      this.getFirstMesh()
+    );
     const size =
       Math.ceil(
         Math.max(
@@ -299,9 +296,9 @@ export class RenderService {
         ) / 5
       ) * 10;
 
-    const color = !settings.grid.color
+    const color = !this.settings.grid.color
       ? RenderService.colors.GRID
-      : settings.grid.color;
+      : this.settings.grid.color;
     const gridHelper = new GridHelper(size, size / 5, color, color);
     this.renderObject(gridHelper.rotateX(degToRad(90)));
 
@@ -312,8 +309,7 @@ export class RenderService {
     `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
   private createMeshes = () => {
-    const data = this.getData();
-    data.forEach((dataItem) => {
+    this.data.forEach((dataItem) => {
       const geometry = this.loader.parse(
         ContentService.base64ToArrayBuffer(dataItem)
       );
@@ -328,18 +324,17 @@ export class RenderService {
       mesh.castShadow = true;
       mesh.receiveShadow = true;
 
-      this.meshes.set(dataItem, mesh);
+      this.meshes.set(ContentService.stringToKey(dataItem), mesh);
     });
   };
 
   private getMaterialConfig = (): MeshMaterialSettings => {
-    const dataCount = this.getData().length;
-    const settings = this.getSettings();
+    const dataCount = this.data.length;
 
     return {
-      ...settings.meshMaterial,
+      ...this.settings.meshMaterial,
       config: {
-        ...settings.meshMaterial.config,
+        ...this.settings.meshMaterial.config,
         // @ts-expect-error color type mismatch
         color:
           dataCount > 1
@@ -355,20 +350,21 @@ export class RenderService {
     this.scene.add(...objects);
   };
 
-  getMeshBoundingBox = (mesh: Mesh) => {
+  static getBoundingBoxForMesh = (mesh: Mesh) => {
     const boundingBox = new Box3();
     boundingBox.setFromObject(mesh);
     return boundingBox;
   };
 
-  getBoundingBoxDimensions = (boundingBox: Box3) =>
+  static getBoundingBoxSize = (boundingBox: Box3) =>
     boundingBox.getSize(new Vector3(0, 0, 0));
 
   private createExtras = () => {
-    const boundingBox = this.getMeshBoundingBox(this.getFirstMesh());
-    const settings = this.getSettings();
+    const boundingBox = RenderService.getBoundingBoxForMesh(
+      this.getFirstMesh()
+    );
 
-    if (settings.view.showAxes) {
+    if (this.settings.view.showAxes) {
       const size =
         Math.ceil(
           Math.max(
@@ -383,21 +379,10 @@ export class RenderService {
       this.renderObject(axesHelper);
     }
 
-    if (settings.view.showBoundingBox) {
+    if (this.settings.view.showBoundingBox) {
       const meshBoxHelper = new Box3Helper(boundingBox, 0xffff00);
       this.renderObject(meshBoxHelper);
     }
-  };
-
-  getStateManager = () => {
-    return {
-      getState: (): RenderState => {
-        return this.webviewApi.getState() || {};
-      },
-      setState: (s: RenderState) => {
-        this.webviewApi.setState(s);
-      },
-    };
   };
 
   onWindowResize = () => {
@@ -416,8 +401,8 @@ export class RenderService {
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
 
-    this.getStateManager().setState({
-      ...this.getStateManager().getState(),
+    this.stateManager.setState({
+      ...this.stateManager.getState(),
       cameraPosition: {
         x: this.camera.position.x,
         y: this.camera.position.y,
@@ -425,4 +410,22 @@ export class RenderService {
       },
     });
   };
+
+  static createInstance = (
+    viewerElement: HTMLElement,
+    stateManager: StateManager,
+    data: string[],
+    settings: Settings
+  ) => {
+    RenderService.instance = new RenderService(
+      viewerElement,
+      stateManager,
+      data,
+      settings
+    );
+
+    return RenderService.instance;
+  };
+
+  static getInstance = () => RenderService.instance;
 }

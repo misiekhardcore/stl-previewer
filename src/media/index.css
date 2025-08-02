@@ -1,0 +1,70 @@
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --offset: 0.25rem;
+}
+
+.button {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  cursor: pointer;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+#viewer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.controls {
+  position: absolute;
+  top: var(--offset);
+  right: var(--offset);
+  z-index: 1000;
+  display: flex;
+  gap: var(--offset);
+}
+
+.info-box {
+  position: absolute;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  padding: 0.5rem;
+  top: var(--offset);
+  left: var(--offset);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--vscode-editor-foreground);
+  z-index: 1000;
+}

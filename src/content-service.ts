@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+const DEFAULT_KEY_LENGTH = 20;
+
 export class ContentService {
   static escapeAttribute = (value: string | vscode.Uri): string =>
     value.toString().replace(/"/g, "&quot;");
@@ -20,5 +22,13 @@ export class ContentService {
 
   static parse = <T>(value: string): T => {
     return JSON.parse(value) as T;
+  };
+
+  static stringToKey = (
+    value: string,
+    keyLength = DEFAULT_KEY_LENGTH
+  ) => {
+    const stringLength = value.length;
+    return value.substring(stringLength - keyLength, stringLength);
   };
 }

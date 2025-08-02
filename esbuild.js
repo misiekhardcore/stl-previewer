@@ -22,11 +22,11 @@ const esbuildProblemMatcherPlugin = {
         );
       });
       copyFile(
-        `${__dirname}/src/media/main.css`,
-        `${__dirname}/dist/media/main.css`,
+        `${__dirname}/src/media/index.css`,
+        `${__dirname}/dist/media/index.css`,
         (err) => {
           if (err) {
-            console.error("[ERROR] Failed to copy main.css:", err);
+            console.error("[ERROR] Failed to copy index.css:", err);
           }
         }
       );
@@ -36,8 +36,9 @@ const esbuildProblemMatcherPlugin = {
 };
 
 async function main() {
-  const ctx = await esbuild.context({
-    entryPoints: ["src/extension.ts", "src/media/main.ts"],
+  // Build the extension (Node.js platform)
+  const extensionCtx = await esbuild.context({
+    entryPoints: ["src/extension.ts"],
     outdir: "dist",
     bundle: true,
     format: "cjs",
@@ -49,11 +50,26 @@ async function main() {
     logLevel: production ? "silent" : "info",
     plugins: [esbuildProblemMatcherPlugin],
   });
+
+  // Build the webview (browser platform)
+  const webviewCtx = await esbuild.context({
+    entryPoints: ["src/media/index.tsx"],
+    outdir: "dist/media",
+    bundle: true,
+    format: "iife", // Use IIFE for browser
+    minify: production,
+    sourcemap: !production,
+    sourcesContent: false,
+    platform: "browser", // This is the key change
+    logLevel: production ? "silent" : "info",
+    plugins: [esbuildProblemMatcherPlugin],
+  });
+
   if (watch) {
-    await ctx.watch();
+    await Promise.all([extensionCtx.watch(), webviewCtx.watch()]);
   } else {
-    await ctx.rebuild();
-    await ctx.dispose();
+    await Promise.all([extensionCtx.rebuild(), webviewCtx.rebuild()]);
+    await Promise.all([extensionCtx.dispose(), webviewCtx.dispose()]);
   }
 }
 
