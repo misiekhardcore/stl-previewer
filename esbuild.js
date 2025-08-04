@@ -1,5 +1,4 @@
 const esbuild = require("esbuild");
-const { copyFile } = require("fs");
 
 const production = process.argv.includes("--production");
 const watch = process.argv.includes("--watch");
@@ -21,18 +20,6 @@ const esbuildProblemMatcherPlugin = {
           `    ${location.file}:${location.line}:${location.column}:`
         );
       });
-      console.log("[watch] copying index.css");
-      copyFile(
-        `${__dirname}/src/media/index.css`,
-        `${__dirname}/dist/media/index.css`,
-        (err) => {
-          if (err) {
-            console.error("[ERROR] Failed to copy index.css:", err);
-          } else {
-            console.log("[watch] index.css copied");
-          }
-        }
-      );
       console.log("[watch] build finished");
     });
   },
@@ -63,7 +50,7 @@ async function main() {
     minify: production,
     sourcemap: !production,
     sourcesContent: false,
-    platform: "browser", // This is the key change
+    platform: "browser",
     logLevel: production ? "silent" : "info",
     plugins: [esbuildProblemMatcherPlugin],
   });
@@ -71,7 +58,7 @@ async function main() {
   // Build the CSG worker (browser platform)
   const workerCtx = await esbuild.context({
     entryPoints: ["src/csg-worker.ts"],
-    outdir: "dist/media", // Change this from "dist" to "dist/media"
+    outdir: "dist/media",
     bundle: true,
     format: "iife", // Use IIFE for browser
     minify: production,
