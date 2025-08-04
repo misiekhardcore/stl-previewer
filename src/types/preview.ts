@@ -8,5 +8,5 @@ export interface PreviewData {
 
 export interface PreviewResponse {
   settings: Settings;
-  data: PreviewData;
+  data: PreviewData | null;
 }

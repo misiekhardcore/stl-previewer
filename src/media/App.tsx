@@ -1,18 +1,47 @@
-import { useState } from "react";
+// @ts-nocheck
+import { useEffect, useState } from "react";
 import { Controls } from "./controls";
 import { usePreviewData } from "./hooks/usePreviewData";
 import { InfoBox } from "./info-box";
 import { RenderService } from "../render-service";
 import { Mesh } from "three";
+import { renderData } from "./renderData";
+import { PreviewData } from "../types/preview";
+import { Loading } from "./Loading";
 
 export function App() {
   const rendererService = RenderService.getInstance();
-  const { settings } = usePreviewData();
+  const { settings, data } = usePreviewData();
   const camera = rendererService.getCamera();
-  const [mesh] = useState<Mesh | null>(rendererService.getFirstMesh());
+  const [mesh, setMesh] = useState<Mesh | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (hasData(data)) {
+      setIsLoading(true);
+      setTimeout(() => {
+        const mesh = renderData(rendererService, data, settings);
+        setMesh(mesh);
+        setIsLoading(false);
+      });
+    }
+  }, [data, settings]);
+
+  useEffect(() => {
+    const onWindowResize = () => rendererService.onWindowResize();
+    window.addEventListener("resize", onWindowResize, false);
+
+    return () => {
+      window.removeEventListener("resize", onWindowResize);
+    };
+  }, []);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   if (!mesh) {
-    return null;
+    return <div className="error">No mesh</div>;
   }
 
   return (
@@ -22,14 +51,21 @@ export function App() {
       )}
       {settings?.view.showViewButtons && (
         <Controls
-          onButtonClick={(button) => {
+          onButtonClick={(position) => {
             rendererService.setCameraPosition({
-              position: button,
-              mesh,
+              position,
             });
           }}
         />
       )}
     </>
+  );
+}
+
+function hasData(data: PreviewData | null): data is PreviewData {
+  return (
+    !!data?.fileContent ||
+    !!data?.prevFileContent ||
+    !!data?.currentFileContent
   );
 }

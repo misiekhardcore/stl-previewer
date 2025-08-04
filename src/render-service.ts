@@ -41,6 +41,7 @@ export interface RenderState {
 export interface StateManager {
   getState: () => RenderState;
   setState: (s: RenderState) => void;
+  updateState: (s: Partial<RenderState>) => void;
 }
 
 export class RenderService {
@@ -58,64 +59,64 @@ export class RenderService {
   private camera: PerspectiveCamera;
   private renderer: WebGLRenderer;
   private controls: TrackballControls;
-  private meshes = new Map<string, Mesh>();
   private loader: STLLoader;
+  private cameraFocusMesh: Mesh | undefined;
 
-  constructor(
-    private readonly viewerElement: HTMLElement,
+  static createInstance = (
+    viewerElement: HTMLElement,
+    stateManager: StateManager,
+    settings: Settings
+  ) => {
+    RenderService.instance = new RenderService(
+      viewerElement,
+      stateManager,
+      settings
+    );
+
+    return RenderService.instance;
+  };
+
+  static getInstance = () => RenderService.instance;
+
+  private constructor(
+    private _viewerElement: HTMLElement,
     private readonly stateManager: StateManager,
-    private readonly data: string[],
     private readonly settings: Settings
   ) {
     this.loader = new STLLoader();
     this.renderer = this.createRenderer();
+    this.scene = this.createScene();
+    this.camera = this.createCamera();
+    this.viewerElement = _viewerElement;
     this.viewerElement.appendChild(this.renderer.domElement);
 
-    this.scene = this.createScene();
-    this.camera = this.createCamera(
-      this.stateManager.getState().cameraPosition
-    );
-    this.createLights();
-    this.createMeshes();
-    this.controls = this.createControls(
-      this.renderer,
-      this.camera,
-      this.getFirstMesh()
-    );
-
-    if (!this.stateManager.getState().cameraPosition) {
-      this.setCameraPosition({});
-    }
-
-    if (this.settings.grid.enable) {
-      this.createGrid();
-    }
-
-    this.createExtras();
+    this.renderObject(...this.createLights());
+    this.controls = this.createControls();
 
     this.update();
   }
 
+  get viewerElement() {
+    if (!this._viewerElement) {
+      throw new Error("Viewer element not found");
+    }
+    return this._viewerElement;
+  }
+
+  set viewerElement(element: HTMLElement) {
+    this._viewerElement = element;
+    this.updateCamera(element);
+  }
+
   getCamera = () => this.camera;
 
-  hasMesh = (id: string) => this.meshes.has(id);
-
-  getMesh = (id: string) => {
-    const key = ContentService.stringToKey(id);
-    return this.meshes.get(key) ?? null;
-  };
-
-  getFirstMesh = () =>
-    this.meshes.get(ContentService.stringToKey(this.data[0]))!;
+  getFocusedMesh = () => this.cameraFocusMesh;
 
   private createRenderer = () => {
-    const { width, height } =
-      this.viewerElement.getBoundingClientRect();
     const renderer = new WebGLRenderer({
       antialias: true,
     });
     renderer.outputColorSpace = SRGBColorSpace;
-    renderer.setSize(width, height);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
 
@@ -129,12 +130,9 @@ export class RenderService {
     return scene;
   };
 
-  private createCamera = (
-    cameraPosition: RenderState["cameraPosition"]
-  ) => {
-    const { width, height } =
-      this.viewerElement.getBoundingClientRect();
-    const camera = new PerspectiveCamera(75, width / height, 0.1, 1000);
+  private createCamera = () => {
+    const { cameraPosition } = this.stateManager.getState();
+    const camera = new PerspectiveCamera(75, undefined);
 
     camera.up = new Vector3(0, 0, 1);
 
@@ -147,96 +145,122 @@ export class RenderService {
     return camera;
   };
 
-  setCameraPosition = (
-    {
-      position = "isometric",
-      mesh,
-    }: {
-      position?: "isometric" | "top" | "left" | "right" | "bottom";
-      mesh?: Mesh;
-    } = {
-      position: "isometric",
-    }
-  ) => {
+  setCameraPosition = ({
+    position = "isometric",
+    mesh,
+  }: {
+    position?: "isometric" | "top" | "left" | "right" | "bottom";
+    mesh?: Mesh | undefined;
+  }) => {
     const { viewOffset } = this.settings.view;
 
-    const boundingBox = RenderService.getBoundingBoxForMesh(
-      mesh || this.getFirstMesh()
-    );
-    const dimensions = boundingBox.getSize(new Vector3(0, 0, 0));
-
-    this.controls.reset();
-
-    switch (position) {
-      case "top":
-        // TODO: for some reason, 0 messes up the view, to investigate further
-        this.camera.position.set(
-          0,
-          -0.001,
-          boundingBox.max.z + viewOffset
-        );
-        break;
-      case "left":
-        this.camera.position.set(
-          -(boundingBox.max.x + viewOffset),
-          0,
-          dimensions.z / 2
-        );
-        break;
-      case "right":
-        this.camera.position.set(
-          boundingBox.max.x + viewOffset,
-          0,
-          dimensions.z / 2
-        );
-        break;
-      case "bottom":
-        // TODO: for some reason, 0 messes up the view, to investigate further
-        this.camera.position.set(
-          0,
-          -0.001,
-          -(boundingBox.max.z + viewOffset)
-        );
-        break;
-      case "isometric":
-      default: {
-        // find the biggest dimension so we can offset it
-        let dimension =
-          dimensions.z > dimensions.x ? dimensions.z : dimensions.x;
-        dimension = boundingBox.max.z;
-
-        this.camera.position.set(
-          dimension + viewOffset / 2,
-          dimension + viewOffset / 2,
-          dimension + viewOffset / 2
-        );
-        break;
-      }
+    if (mesh) {
+      this.cameraFocusMesh = mesh;
+    } else {
+      mesh = this.cameraFocusMesh;
     }
+
+    if (!mesh) {
+      throw new Error("No mesh to focus on");
+    }
+
+    const boundingBox = RenderService.getBoundingBoxForMesh(mesh);
+
+    const cameraPosition = this.getCameraPosition(
+      position,
+      boundingBox,
+      viewOffset
+    );
+    const maxDistance =
+      Math.max(
+        Math.abs(cameraPosition.x),
+        Math.abs(cameraPosition.y),
+        Math.abs(cameraPosition.z)
+      ) * 2;
+
+    this.camera.position.set(
+      cameraPosition.x,
+      cameraPosition.y,
+      cameraPosition.z
+    );
+
+    this.camera.near = 0.1;
+    this.camera.far = maxDistance;
 
     // make sure we are looking at the mesh
     const meshCenter = boundingBox.getCenter(new Vector3(0, 0, 0));
     this.camera.lookAt(meshCenter);
-    this.controls.target = meshCenter;
 
-    this.controls.update();
+    if (this.controls) {
+      this.controls.target = meshCenter;
+      this.controls.maxDistance = maxDistance;
+      this.controls.update();
+    }
   };
 
-  private createControls = (
-    renderer: WebGLRenderer,
-    camera: PerspectiveCamera,
-    mesh: Mesh
-  ) => {
-    const controls = new TrackballControls(camera, renderer.domElement);
+  private getCameraPosition = (
+    position: "isometric" | "top" | "left" | "right" | "bottom",
+    boundingBox: Box3,
+    viewOffset: number
+  ): Vector3 => {
+    const dimensions = boundingBox.getSize(new Vector3(0, 0, 0));
+    const { max } = boundingBox;
+    const maxX = Math.max(Math.abs(dimensions.x), Math.abs(max.x));
+    const maxY = Math.max(Math.abs(dimensions.y), Math.abs(max.y));
+    const maxZ = Math.max(Math.abs(dimensions.z), Math.abs(max.z));
+
+    const offsetMultiplier = 1.2;
+
+    switch (position) {
+      case "top":
+        return new Vector3(
+          0,
+          -0.001,
+          Math.max(maxX, maxY) * offsetMultiplier + viewOffset
+        );
+      case "left":
+        return new Vector3(
+          -(Math.max(maxY, maxZ) * offsetMultiplier + viewOffset),
+          0,
+          maxZ
+        );
+
+      case "right":
+        return new Vector3(
+          Math.max(maxY, maxZ) * offsetMultiplier + viewOffset,
+          0,
+          maxZ
+        );
+
+      case "bottom":
+        return new Vector3(
+          0,
+          -0.001,
+          -(Math.max(maxX, maxY) * offsetMultiplier + viewOffset)
+        );
+
+      case "isometric":
+      default:
+        return new Vector3(
+          maxX * offsetMultiplier + viewOffset,
+          maxY * offsetMultiplier + viewOffset,
+          maxZ * offsetMultiplier + viewOffset
+        );
+    }
+  };
+
+  private createControls = () => {
+    const controls = new TrackballControls(
+      this.camera,
+      this.renderer.domElement
+    );
     controls.panSpeed = 2;
     controls.rotateSpeed = 5;
 
-    const boundingBox = RenderService.getBoundingBoxForMesh(mesh);
+    const meshCenter = new Vector3(0, 0, 0);
 
-    const meshCenter = boundingBox.getCenter(new Vector3(0, 0, 0));
-    camera.lookAt(meshCenter);
+    this.camera.lookAt(meshCenter);
     controls.target = meshCenter;
-
     controls.update();
 
     return controls;
@@ -256,10 +280,6 @@ export class RenderService {
     directionalLight.castShadow = true;
 
     const lights = [hemisphereLight, directionalLight];
-
-    for (let i = 0; i < lights.length; i += 1) {
-      this.scene.add(lights[i]);
-    }
 
     return lights;
   };
@@ -282,71 +302,69 @@ export class RenderService {
     }
   };
 
-  private createGrid = () => {
-    const boundingBox = RenderService.getBoundingBoxForMesh(
-      this.getFirstMesh()
-    );
-    const size =
-      Math.ceil(
-        Math.max(
-          Math.abs(boundingBox.max.x),
-          Math.abs(boundingBox.min.x),
-          Math.abs(boundingBox.max.y),
-          Math.abs(boundingBox.min.y)
-        ) / 5
-      ) * 10;
+  private createGrid = (mesh: Mesh) => {
+    const boundingBox = RenderService.getBoundingBoxForMesh(mesh);
+    const GRID_CELL_SIZE = 5;
+    const GRID_PADDING_FACTOR = 1.5;
+
+    const maxDimension =
+      Math.max(
+        Math.abs(boundingBox.max.x),
+        Math.abs(boundingBox.min.x),
+        Math.abs(boundingBox.max.y),
+        Math.abs(boundingBox.min.y)
+      ) * 2;
+
+    const size = Math.ceil(maxDimension * GRID_PADDING_FACTOR);
+    const divisions = Math.ceil(size / GRID_CELL_SIZE);
 
     const color = !this.settings.grid.color
       ? RenderService.colors.GRID
       : this.settings.grid.color;
-    const gridHelper = new GridHelper(size, size / 5, color, color);
+    const gridHelper = new GridHelper(size, divisions, color, color);
     this.renderObject(gridHelper.rotateX(degToRad(90)));
 
     return gridHelper;
   };
 
-  private getRandomColor = () =>
-    `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+  createMesh = (dataItem: string, settings?: MeshMaterialSettings) => {
+    const geometry = this.parseGeometry(dataItem);
+    const material = RenderService.getMaterial(
+      this.getMaterialSettings(settings)
+    );
 
-  private createMeshes = () => {
-    this.data.forEach((dataItem) => {
-      const geometry = this.loader.parse(
-        ContentService.base64ToArrayBuffer(dataItem)
-      );
+    // Center the geometry to origin (0,0,0) before creating the mesh
+    geometry.center();
 
-      // Center the geometry to origin (0,0,0) before creating the mesh
-      geometry.center();
+    const mesh = new Mesh(geometry, material);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
 
-      const material = RenderService.getMaterial(
-        this.getMaterialConfig()
-      );
-      const mesh = new Mesh(geometry, material);
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-
-      this.meshes.set(ContentService.stringToKey(dataItem), mesh);
-    });
+    return mesh;
   };
 
-  private getMaterialConfig = (): MeshMaterialSettings => {
-    const dataCount = this.data.length;
+  private parseGeometry = (dataItem: string) => {
+    const geometry = this.loader.parse(
+      ContentService.base64ToArrayBuffer(dataItem)
+    );
+    return geometry;
+  };
 
+  public getMaterialSettings = (
+    config?: Partial<MeshMaterialSettings>
+  ): MeshMaterialSettings => {
     return {
       ...this.settings.meshMaterial,
+      ...config,
       config: {
+        color: RenderService.colors.DEFAULT,
         ...this.settings.meshMaterial.config,
-        // @ts-expect-error color type mismatch
-        color:
-          dataCount > 1
-            ? this.getRandomColor()
-            : RenderService.colors.DEFAULT,
-        transparent: dataCount > 1,
-        opacity: dataCount > 1 ? 0.5 : 1,
+        ...config?.config,
       },
-    };
+    } as MeshMaterialSettings;
   };
 
-  renderObject = (...objects: Object3D[]) => {
+  public renderObject = (...objects: Object3D[]) => {
     this.scene.add(...objects);
   };
 
@@ -359,10 +377,12 @@ export class RenderService {
   static getBoundingBoxSize = (boundingBox: Box3) =>
     boundingBox.getSize(new Vector3(0, 0, 0));
 
-  private createExtras = () => {
-    const boundingBox = RenderService.getBoundingBoxForMesh(
-      this.getFirstMesh()
-    );
+  public createExtras = (mesh: Mesh) => {
+    const boundingBox = RenderService.getBoundingBoxForMesh(mesh);
+
+    if (this.settings.grid.enable) {
+      this.createGrid(mesh);
+    }
 
     if (this.settings.view.showAxes) {
       const size =
@@ -385,24 +405,25 @@ export class RenderService {
     }
   };
 
-  onWindowResize = () => {
-    const { width, height } =
-      this.viewerElement.getBoundingClientRect();
+  private updateCamera = (viewerElement: HTMLElement) => {
+    const { width, height } = viewerElement.getBoundingClientRect();
 
     this.camera.aspect = width / height;
-
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
   };
 
-  update = () => {
+  onWindowResize = () => {
+    this.updateCamera(this.viewerElement);
+  };
+
+  private update = () => {
     requestAnimationFrame(() => this.update());
 
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
 
-    this.stateManager.setState({
-      ...this.stateManager.getState(),
+    this.stateManager.updateState({
       cameraPosition: {
         x: this.camera.position.x,
         y: this.camera.position.y,
@@ -410,22 +431,4 @@ export class RenderService {
       },
     });
   };
-
-  static createInstance = (
-    viewerElement: HTMLElement,
-    stateManager: StateManager,
-    data: string[],
-    settings: Settings
-  ) => {
-    RenderService.instance = new RenderService(
-      viewerElement,
-      stateManager,
-      data,
-      settings
-    );
-
-    return RenderService.instance;
-  };
-
-  static getInstance = () => RenderService.instance;
 }

@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
 import { getPreviewData } from "../utils/getPreviewData";
 import { PreviewResponse } from "../../types/preview";
-import {
-  DEFAULT_DATA,
-  DEFAULT_SETTINGS,
-} from "../utils/getPreviewData";
+import { DEFAULT_SETTINGS } from "../utils/getPreviewData";
 
 export function usePreviewData() {
-  const [data, setData] =
-    useState<PreviewResponse["data"]>(DEFAULT_DATA);
+  const [data, setData] = useState<PreviewResponse["data"]>(null);
   const [settings, setSettings] =
     useState<PreviewResponse["settings"]>(DEFAULT_SETTINGS);
 

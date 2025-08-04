@@ -56,7 +56,7 @@
         },
         "stlPreviewer.viewOffset": {
           "type": "number",
-          "default": 60,
+          "default": 40,
           "description": "Offset of the view when using view buttons"
         },
         "stlPreviewer.showInfo": {

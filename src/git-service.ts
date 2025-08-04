@@ -32,7 +32,7 @@ export class GitService {
       );
 
       return fileBuffer;
-    } catch (error) {
+    } catch (_error) {
       return Buffer.from([]);
     }
   };

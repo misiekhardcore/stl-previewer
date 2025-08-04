@@ -2,12 +2,6 @@ import { ContentService } from "../../content-service";
 import { PreviewResponse } from "../../types/preview";
 import { MeshMaterialType } from "../../types/settings";
 
-export const DEFAULT_DATA: PreviewResponse["data"] = {
-  fileContent: undefined,
-  prevFileContent: undefined,
-  currentFileContent: undefined,
-};
-
 export const DEFAULT_SETTINGS: PreviewResponse["settings"] = {
   grid: {
     enable: false,
@@ -29,6 +23,10 @@ export const DEFAULT_SETTINGS: PreviewResponse["settings"] = {
 let cachedData: PreviewResponse | null = null;
 
 export function getPreviewData(): PreviewResponse {
+  if (cachedData) {
+    return cachedData;
+  }
+
   const element = document.getElementById("settings");
   if (element) {
     const data = element.getAttribute("data-settings");
@@ -38,10 +36,8 @@ export function getPreviewData(): PreviewResponse {
     }
   }
 
-  return (
-    cachedData || {
-      settings: DEFAULT_SETTINGS,
-      data: DEFAULT_DATA,
-    }
-  );
+  return {
+    settings: DEFAULT_SETTINGS,
+    data: null,
+  };
 }

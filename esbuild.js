@@ -21,12 +21,15 @@ const esbuildProblemMatcherPlugin = {
           `    ${location.file}:${location.line}:${location.column}:`
         );
       });
+      console.log("[watch] copying index.css");
       copyFile(
         `${__dirname}/src/media/index.css`,
         `${__dirname}/dist/media/index.css`,
         (err) => {
           if (err) {
             console.error("[ERROR] Failed to copy index.css:", err);
+          } else {
+            console.log("[watch] index.css copied");
           }
         }
       );
@@ -53,7 +56,7 @@ async function main() {
 
   // Build the webview (browser platform)
   const webviewCtx = await esbuild.context({
-    entryPoints: ["src/media/index.tsx"],
+    entryPoints: ["src/media/index.tsx", "src/media/index.css"],
     outdir: "dist/media",
     bundle: true,
     format: "iife", // Use IIFE for browser

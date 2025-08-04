@@ -65,6 +65,52 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  background-color: var(--vscode-editor-background);
   color: var(--vscode-editor-foreground);
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
   z-index: 1000;
+  vertical-align: baseline;
+  font-size: 1.5rem;
+}
+
+.loading span::after {
+  content: ".";
+  display: inline-block;
+  animation: loading 1s infinite;
+}
+
+.loading span:nth-child(1)::after {
+  margin-left: 0.5rem;
+}
+
+.loading span:nth-child(2)::after {
+  animation-delay: 0.2s;
+}
+
+.loading span:nth-child(3)::after {
+  animation-delay: 0.4s;
+}
+
+@keyframes loading {
+  0% {
+    color: red;
+    transform: translateY(0);
+  }
+  25% {
+    color: blue;
+    transform: translateY(-25%);
+  }
+  50% {
+    color: green;
+    transform: translateY(-50%);
+  }
+  75% {
+    color: yellow;
+    transform: translateY(-25%);
+  }
+  100% {
+    color: red;
+    transform: translateY(0);
+  }
 }

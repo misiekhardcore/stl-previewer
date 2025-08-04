@@ -1,4 +1,4 @@
-import { BufferAttribute, BufferGeometry, Material } from "three";
+import { BufferAttribute, BufferGeometry, Material, Mesh } from "three";
 import {
   SUBTRACTION,
   Brush,
@@ -33,22 +33,22 @@ export class CSGService {
   private secondBrush: Brush | null = null;
 
   constructor(
-    firstSolid: BufferGeometry | null,
-    secondSolid: BufferGeometry | null,
+    firstMesh: Mesh | null,
+    secondMesh: Mesh | null,
     private readonly meshMaterial: MeshMaterialSettings
   ) {
-    if (!firstSolid && !secondSolid) {
+    if (!firstMesh && !secondMesh) {
       throw new Error("No solids provided for diff calculation.");
     }
     this.evaluator = new Evaluator();
 
-    if (firstSolid) {
-      this.setUv(firstSolid);
-      this.firstBrush = new Brush(firstSolid);
+    if (firstMesh) {
+      this.setUv(firstMesh.geometry);
+      this.firstBrush = new Brush(firstMesh.geometry);
     }
-    if (secondSolid) {
-      this.setUv(secondSolid);
-      this.secondBrush = new Brush(secondSolid);
+    if (secondMesh) {
+      this.setUv(secondMesh.geometry);
+      this.secondBrush = new Brush(secondMesh.geometry);
     }
   }
 
