@@ -1,6 +1,6 @@
 {
   "name": "stl-previewer",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "VSCode extension to preview STL files and visualize diffs.",
   "icon": "icons/icon-128.png",
   "main": "./dist/extension.js",
