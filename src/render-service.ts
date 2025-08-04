@@ -189,13 +189,13 @@ export class RenderService {
 
     // make sure we are looking at the mesh
     const meshCenter = boundingBox.getCenter(new Vector3(0, 0, 0));
-    this.camera.lookAt(meshCenter);
 
     if (this.controls) {
       this.controls.target = meshCenter;
       this.controls.maxDistance = maxDistance;
       this.controls.update();
     }
+    this.camera.lookAt(meshCenter);
   };
 
   private getCameraPosition = (
@@ -327,20 +327,25 @@ export class RenderService {
     return gridHelper;
   };
 
-  createMesh = (dataItem: string, settings?: MeshMaterialSettings) => {
-    const geometry = this.parseGeometry(dataItem);
-    const material = RenderService.getMaterial(
-      this.getMaterialSettings(settings)
-    );
+  createMesh = (
+    dataItem: string,
+    settings?: MeshMaterialSettings
+  ): Promise<Mesh> => {
+    return new Promise((resolve) => {
+      const geometry = this.parseGeometry(dataItem);
+      const material = RenderService.getMaterial(
+        this.getMaterialSettings(settings)
+      );
 
-    // Center the geometry to origin (0,0,0) before creating the mesh
-    geometry.center();
+      // Center the geometry to origin (0,0,0) before creating the mesh
+      geometry.center();
 
-    const mesh = new Mesh(geometry, material);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+      const mesh = new Mesh(geometry, material);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
 
-    return mesh;
+      resolve(mesh);
+    });
   };
 
   private parseGeometry = (dataItem: string) => {

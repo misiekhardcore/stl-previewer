@@ -33,7 +33,11 @@ export class Preview extends Disposable {
 
     webviewPanel.webview.options = {
       enableScripts: true,
-      localResourceRoots: [resourceRoot, extensionRoot],
+      localResourceRoots: [
+        resourceRoot,
+        extensionRoot,
+        extensionRoot.with({ path: extensionRoot.path + "/dist" }),
+      ],
     };
 
     this._register(
@@ -151,8 +155,9 @@ export class Preview extends Disposable {
   private getWebviewContents = async (): Promise<string> => {
     const previewData = await this.getPreviewData();
     const nonce = Date.now().toString();
-
     const cspSource = this.webviewPanel.webview.cspSource;
+    const workerDataUrl = await this.getWorkerDataUrl();
+
     return /* html */ `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -160,7 +165,7 @@ export class Preview extends Disposable {
 	<!-- Disable pinch zooming -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
 	<title>STL Preview</title>
-	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: ${cspSource}; script-src 'nonce-${nonce}'; style-src ${cspSource} 'nonce-${nonce}'; connect-src https:;">
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: ${cspSource}; script-src 'nonce-${nonce}' 'unsafe-eval'; style-src ${cspSource} 'nonce-${nonce}'; connect-src https:; worker-src data: blob:;">
 	<meta id="settings" data-settings="${ContentService.escapeAttribute(
     ContentService.stringify(previewData)
   )}">
@@ -171,6 +176,9 @@ export class Preview extends Disposable {
 <body>
   <div id="root"></div>
   <div id="viewer"></div>
+  <script nonce="${nonce}">
+    window.CSG_WORKER_URL = "${workerDataUrl}";
+  </script>
 	<script type="module" src="${ContentService.escapeAttribute(
     this.getResourceUri(Preview.JS_PATH)
   )}" nonce="${nonce}"></script>
@@ -184,5 +192,17 @@ export class Preview extends Disposable {
         path: this.extensionRoot.path + path,
       })
     );
+  };
+
+  private getWorkerDataUrl = async (): Promise<string> => {
+    const workerContent = await readFile(
+      this.extensionRoot.with({
+        path: this.extensionRoot.path + "/dist/media/csg-worker.js",
+      }).fsPath,
+      "utf8"
+    );
+    return `data:application/javascript;base64,${Buffer.from(
+      workerContent
+    ).toString("base64")}`;
   };
 }

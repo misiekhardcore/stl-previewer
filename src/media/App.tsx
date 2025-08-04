@@ -19,11 +19,13 @@ export function App() {
   useEffect(() => {
     if (hasData(data)) {
       setIsLoading(true);
-      setTimeout(() => {
-        const mesh = renderData(rendererService, data, settings);
-        setMesh(mesh);
-        setIsLoading(false);
-      });
+      renderData(rendererService, data, settings)
+        .then((mesh) => {
+          setMesh(mesh);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
   }, [data, settings]);
 

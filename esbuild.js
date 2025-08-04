@@ -68,11 +68,37 @@ async function main() {
     plugins: [esbuildProblemMatcherPlugin],
   });
 
+  // Build the CSG worker (browser platform)
+  const workerCtx = await esbuild.context({
+    entryPoints: ["src/csg-worker.ts"],
+    outdir: "dist/media", // Change this from "dist" to "dist/media"
+    bundle: true,
+    format: "iife", // Use IIFE for browser
+    minify: production,
+    sourcemap: !production,
+    sourcesContent: false,
+    platform: "browser",
+    logLevel: production ? "silent" : "info",
+    plugins: [esbuildProblemMatcherPlugin],
+  });
+
   if (watch) {
-    await Promise.all([extensionCtx.watch(), webviewCtx.watch()]);
+    await Promise.all([
+      extensionCtx.watch(),
+      webviewCtx.watch(),
+      workerCtx.watch(),
+    ]);
   } else {
-    await Promise.all([extensionCtx.rebuild(), webviewCtx.rebuild()]);
-    await Promise.all([extensionCtx.dispose(), webviewCtx.dispose()]);
+    await Promise.all([
+      extensionCtx.rebuild(),
+      webviewCtx.rebuild(),
+      workerCtx.rebuild(),
+    ]);
+    await Promise.all([
+      extensionCtx.dispose(),
+      webviewCtx.dispose(),
+      workerCtx.dispose(),
+    ]);
   }
 }
 
