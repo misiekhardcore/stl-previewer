@@ -178,6 +178,10 @@ export class RenderService {
         Math.abs(cameraPosition.z)
       ) * 2;
 
+    if (this.controls) {
+      this.controls.reset();
+    }
+
     this.camera.position.set(
       cameraPosition.x,
       cameraPosition.y,
@@ -190,12 +194,13 @@ export class RenderService {
     // make sure we are looking at the mesh
     const meshCenter = boundingBox.getCenter(new Vector3(0, 0, 0));
 
+    this.camera.lookAt(meshCenter);
+
     if (this.controls) {
       this.controls.target = meshCenter;
       this.controls.maxDistance = maxDistance;
       this.controls.update();
     }
-    this.camera.lookAt(meshCenter);
   };
 
   private getCameraPosition = (
