@@ -83,6 +83,14 @@ When enabled, use the view buttons in the top-right corner:
 - **Left/Right**: Side views
 - **Bottom**: View from below
 
+### 📚 Detailed Documentation
+
+For comprehensive guides and references, see the [Documentation](docs/README.md):
+- **[Quick Start Guide](docs/QUICK_START.md)** - Get started in 5 minutes
+- **[Usage Guide](docs/USAGE.md)** - Complete feature walkthrough
+- **[Configuration Guide](docs/CONFIGURATION.md)** - All settings explained
+- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Solve common issues
+
 ## ⚙️ Configuration
 
 Access settings via `File > Preferences > Settings` and search for "STL Previewer":
