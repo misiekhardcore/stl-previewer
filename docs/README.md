@@ -26,6 +26,12 @@ Welcome to the STL Previewer documentation! This directory contains detailed gui
   - Configuration examples
   - Best practices
 
+- **[Features Overview](FEATURES.md)** - Detailed feature descriptions
+  - Visual interface layout
+  - Feature matrix
+  - Feature combinations
+  - Recommended settings
+
 ### Help & Support
 - **[Troubleshooting Guide](TROUBLESHOOTING.md)** - Solve common issues
   - Installation issues
@@ -35,6 +41,14 @@ Welcome to the STL Previewer documentation! This directory contains detailed gui
   - Performance issues
   - UI issues
   - Getting help
+
+- **[FAQ](FAQ.md)** - Frequently Asked Questions
+  - General questions
+  - Installation & setup
+  - Usage questions
+  - Git diff questions
+  - Performance questions
+  - Compatibility questions
 
 ### Development
 - **[Contributing Guide](../CONTRIBUTING.md)** - How to contribute
