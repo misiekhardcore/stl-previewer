@@ -1,10 +1,4 @@
-const buttons = [
-  "isometric",
-  "top",
-  "left",
-  "right",
-  "bottom",
-] as const;
+const buttons = ["isometric", "top", "left", "right", "bottom"] as const;
 
 interface ControlsProps {
   onButtonClick: (button: (typeof buttons)[number]) => void;

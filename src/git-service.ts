@@ -10,9 +10,7 @@ export class GitService {
 
   constructor() {
     const gitExtension =
-      vscode.extensions.getExtension<GitExtension>(
-        "vscode.git"
-      )?.exports;
+      vscode.extensions.getExtension<GitExtension>("vscode.git")?.exports;
 
     if (!gitExtension) {
       throw new Error("Git extension not found");
@@ -22,13 +20,13 @@ export class GitService {
   }
 
   public getPrevFileContent = async (
-    uri: vscode.Uri
+    uri: vscode.Uri,
   ): Promise<Buffer<ArrayBufferLike>> => {
     const relPath = this.getRelPath(uri.fsPath);
     try {
       const fileBuffer = await this.getRepository().buffer(
         GitService.HEAD_REF,
-        relPath
+        relPath,
       );
 
       return fileBuffer;
@@ -49,22 +47,18 @@ export class GitService {
   };
 
   getWorkingTreeStatus = async (
-    uri: vscode.Uri
+    uri: vscode.Uri,
   ): Promise<Status | undefined> => {
-    const workingTreeChanges = await this.getRepository().state
-      .workingTreeChanges;
-    return workingTreeChanges.find(
-      (change) => change.uri.fsPath === uri.fsPath
-    )?.status;
+    const workingTreeChanges =
+      await this.getRepository().state.workingTreeChanges;
+    return workingTreeChanges.find((change) => change.uri.fsPath === uri.fsPath)
+      ?.status;
   };
 
-  getIndexStatus = async (
-    uri: vscode.Uri
-  ): Promise<Status | undefined> => {
+  getIndexStatus = async (uri: vscode.Uri): Promise<Status | undefined> => {
     const indexChanges = await this.getRepository().state.indexChanges;
-    return indexChanges.find(
-      (change) => change.uri.fsPath === uri.fsPath
-    )?.status;
+    return indexChanges.find((change) => change.uri.fsPath === uri.fsPath)
+      ?.status;
   };
 
   private getRelPath = (filePath: string): string => {

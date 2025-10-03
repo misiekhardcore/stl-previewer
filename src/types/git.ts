@@ -160,10 +160,10 @@ export interface Repository {
 
   getObjectDetails(
     treeish: string,
-    path: string
+    path: string,
   ): Promise<{ mode: string; object: string; size: number }>;
   detectObjectType(
-    object: string
+    object: string,
   ): Promise<{ mimetype: string; encoding?: string }>;
   buffer(ref: string, path: string): Promise<Buffer>;
   show(ref: string, path: string): Promise<string>;
@@ -183,19 +183,11 @@ export interface Repository {
   diffIndexWith(ref: string, path: string): Promise<string>;
   diffBlobs(object1: string, object2: string): Promise<string>;
   diffBetween(ref1: string, ref2: string): Promise<Change[]>;
-  diffBetween(
-    ref1: string,
-    ref2: string,
-    path: string
-  ): Promise<string>;
+  diffBetween(ref1: string, ref2: string, path: string): Promise<string>;
 
   hashObject(data: string): Promise<string>;
 
-  createBranch(
-    name: string,
-    checkout: boolean,
-    ref?: string
-  ): Promise<void>;
+  createBranch(name: string, checkout: boolean, ref?: string): Promise<void>;
   deleteBranch(name: string, force?: boolean): Promise<void>;
   getBranch(name: string): Promise<Branch>;
   getBranches(query: BranchQuery): Promise<Ref[]>;
@@ -217,7 +209,7 @@ export interface Repository {
     remoteName?: string,
     branchName?: string,
     setUpstream?: boolean,
-    force?: ForcePushMode
+    force?: ForcePushMode,
   ): Promise<void>;
 
   blame(path: string): Promise<string>;
@@ -255,7 +247,7 @@ export interface PushErrorHandler {
     repository: Repository,
     remote: Remote,
     refspec: string,
-    error: Error & { gitErrorCode: GitErrorCodes }
+    error: Error & { gitErrorCode: GitErrorCodes },
   ): Promise<boolean>;
 }
 
@@ -280,12 +272,8 @@ export interface API {
   init(root: Uri): Promise<Repository | null>;
   openRepository(root: Uri): Promise<Repository | null>;
 
-  registerRemoteSourceProvider(
-    provider: RemoteSourceProvider
-  ): Disposable;
-  registerCredentialsProvider(
-    provider: CredentialsProvider
-  ): Disposable;
+  registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable;
+  registerCredentialsProvider(provider: CredentialsProvider): Disposable;
   registerPushErrorHandler(handler: PushErrorHandler): Disposable;
 }
 

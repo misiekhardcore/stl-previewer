@@ -50,37 +50,32 @@ function reconstructBrush(brushData: BrushData): Brush {
   const geometry = new BufferGeometry();
 
   const positionArray = new Float32Array(
-    brushData.geometry.attributes.position.array
+    brushData.geometry.attributes.position.array,
   );
   geometry.setAttribute(
     "position",
     new BufferAttribute(
       positionArray,
-      brushData.geometry.attributes.position.itemSize
-    )
+      brushData.geometry.attributes.position.itemSize,
+    ),
   );
 
   const normalArray = new Float32Array(
-    brushData.geometry.attributes.normal.array
+    brushData.geometry.attributes.normal.array,
   );
   geometry.setAttribute(
     "normal",
     new BufferAttribute(
       normalArray,
-      brushData.geometry.attributes.normal.itemSize
-    )
+      brushData.geometry.attributes.normal.itemSize,
+    ),
   );
 
   if (brushData.geometry.attributes.uv) {
-    const uvArray = new Float32Array(
-      brushData.geometry.attributes.uv.array
-    );
+    const uvArray = new Float32Array(brushData.geometry.attributes.uv.array);
     geometry.setAttribute(
       "uv",
-      new BufferAttribute(
-        uvArray,
-        brushData.geometry.attributes.uv.itemSize
-      )
+      new BufferAttribute(uvArray, brushData.geometry.attributes.uv.itemSize),
     );
   }
 

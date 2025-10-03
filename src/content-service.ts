@@ -24,10 +24,7 @@ export class ContentService {
     return JSON.parse(value) as T;
   };
 
-  static stringToKey = (
-    value: string,
-    keyLength = DEFAULT_KEY_LENGTH
-  ) => {
+  static stringToKey = (value: string, keyLength = DEFAULT_KEY_LENGTH) => {
     const stringLength = value.length;
     return value.substring(stringLength - keyLength, stringLength);
   };

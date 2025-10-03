@@ -18,7 +18,7 @@ export class StlPreviewer implements CustomReadonlyEditorProvider {
   constructor(
     private readonly extensionRoot: Uri,
     private readonly gitService: GitService,
-    private readonly configService: SettingsService
+    private readonly configService: SettingsService,
   ) {}
 
   public openCustomDocument = async (uri: Uri) => {
@@ -27,7 +27,7 @@ export class StlPreviewer implements CustomReadonlyEditorProvider {
 
   public resolveCustomEditor = async (
     document: CustomDocument,
-    webviewPanel: WebviewPanel
+    webviewPanel: WebviewPanel,
   ): Promise<void> => {
     const { fsPath } = document.uri;
 
@@ -37,7 +37,7 @@ export class StlPreviewer implements CustomReadonlyEditorProvider {
         document.uri,
         webviewPanel,
         this.gitService,
-        this.configService
+        this.configService,
       );
       this._previews.set(fsPath, preview);
     }
