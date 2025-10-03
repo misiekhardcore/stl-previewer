@@ -5,20 +5,22 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: "16"
+          node-version: "22"
           cache: "npm"
-      - run: npm run test
+      - run: npm install
+      - run: xvfb-run -a npm run test
 
   compile:
     name: Compile
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: "16"
+          node-version: "22"
           cache: "npm"
+      - run: npm install
       - run: npm run compile
