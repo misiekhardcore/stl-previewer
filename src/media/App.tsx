@@ -48,9 +48,7 @@ export function App() {
 
   return (
     <>
-      {settings?.view.showInfo && (
-        <InfoBox camera={camera} mesh={mesh} />
-      )}
+      {settings?.view.showInfo && <InfoBox camera={camera} mesh={mesh} />}
       {settings?.view.showViewButtons && (
         <Controls
           onButtonClick={(position) => {
@@ -66,8 +64,6 @@ export function App() {
 
 function hasData(data: PreviewData | null): data is PreviewData {
   return (
-    !!data?.fileContent ||
-    !!data?.prevFileContent ||
-    !!data?.currentFileContent
+    !!data?.fileContent || !!data?.prevFileContent || !!data?.currentFileContent
   );
 }

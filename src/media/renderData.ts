@@ -7,7 +7,7 @@ import { Settings } from "../types/settings";
 export async function renderData(
   rendererService: RenderService,
   data: PreviewData,
-  settings: Settings
+  settings: Settings,
 ): Promise<Mesh | null> {
   let mesh: Mesh | null = null;
   let csgService: CSGService;
@@ -24,11 +24,7 @@ export async function renderData(
         : null,
     ]);
 
-    csgService = new CSGService(
-      oldMesh,
-      newMesh,
-      settings.meshMaterial
-    );
+    csgService = new CSGService(oldMesh, newMesh, settings.meshMaterial);
 
     const { added, removed, intersection, sum } = csgService.getDiff();
 

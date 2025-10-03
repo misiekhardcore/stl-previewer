@@ -65,12 +65,12 @@ export class RenderService {
   static createInstance = (
     viewerElement: HTMLElement,
     stateManager: StateManager,
-    settings: Settings
+    settings: Settings,
   ) => {
     RenderService.instance = new RenderService(
       viewerElement,
       stateManager,
-      settings
+      settings,
     );
 
     return RenderService.instance;
@@ -81,7 +81,7 @@ export class RenderService {
   private constructor(
     private _viewerElement: HTMLElement,
     private readonly stateManager: StateManager,
-    private readonly settings: Settings
+    private readonly settings: Settings,
   ) {
     this.loader = new STLLoader();
     this.renderer = this.createRenderer();
@@ -169,13 +169,13 @@ export class RenderService {
     const cameraPosition = this.getCameraPosition(
       position,
       boundingBox,
-      viewOffset
+      viewOffset,
     );
     const maxDistance =
       Math.max(
         Math.abs(cameraPosition.x),
         Math.abs(cameraPosition.y),
-        Math.abs(cameraPosition.z)
+        Math.abs(cameraPosition.z),
       ) * 2;
 
     if (this.controls) {
@@ -185,7 +185,7 @@ export class RenderService {
     this.camera.position.set(
       cameraPosition.x,
       cameraPosition.y,
-      cameraPosition.z
+      cameraPosition.z,
     );
 
     this.camera.near = 0.1;
@@ -206,7 +206,7 @@ export class RenderService {
   private getCameraPosition = (
     position: "isometric" | "top" | "left" | "right" | "bottom",
     boundingBox: Box3,
-    viewOffset: number
+    viewOffset: number,
   ): Vector3 => {
     const dimensions = boundingBox.getSize(new Vector3(0, 0, 0));
     const { max } = boundingBox;
@@ -221,27 +221,27 @@ export class RenderService {
         return new Vector3(
           0,
           -0.001,
-          Math.max(maxX, maxY) * offsetMultiplier + viewOffset
+          Math.max(maxX, maxY) * offsetMultiplier + viewOffset,
         );
       case "left":
         return new Vector3(
           -(Math.max(maxY, maxZ) * offsetMultiplier + viewOffset),
           0,
-          maxZ
+          maxZ,
         );
 
       case "right":
         return new Vector3(
           Math.max(maxY, maxZ) * offsetMultiplier + viewOffset,
           0,
-          maxZ
+          maxZ,
         );
 
       case "bottom":
         return new Vector3(
           0,
           -0.001,
-          -(Math.max(maxX, maxY) * offsetMultiplier + viewOffset)
+          -(Math.max(maxX, maxY) * offsetMultiplier + viewOffset),
         );
 
       case "isometric":
@@ -249,7 +249,7 @@ export class RenderService {
         return new Vector3(
           maxX * offsetMultiplier + viewOffset,
           maxY * offsetMultiplier + viewOffset,
-          maxZ * offsetMultiplier + viewOffset
+          maxZ * offsetMultiplier + viewOffset,
         );
     }
   };
@@ -257,7 +257,7 @@ export class RenderService {
   private createControls = () => {
     const controls = new TrackballControls(
       this.camera,
-      this.renderer.domElement
+      this.renderer.domElement,
     );
     controls.panSpeed = 2;
     controls.rotateSpeed = 5;
@@ -275,11 +275,11 @@ export class RenderService {
     const hemisphereLight = new HemisphereLight(
       RenderService.colors.SKY,
       RenderService.colors.BACKGROUND,
-      0.6
+      0.6,
     );
     const directionalLight = new DirectionalLight(
       RenderService.colors.LIGHT,
-      1
+      1,
     );
     directionalLight.position.set(10, 10, 10);
     directionalLight.castShadow = true;
@@ -289,9 +289,7 @@ export class RenderService {
     return lights;
   };
 
-  public static getMaterial = (
-    materialConfig: MeshMaterialSettings
-  ) => {
+  public static getMaterial = (materialConfig: MeshMaterialSettings) => {
     switch (materialConfig.type) {
       case MeshMaterialType.BASIC:
         return new MeshBasicMaterial(materialConfig.config);
@@ -317,7 +315,7 @@ export class RenderService {
         Math.abs(boundingBox.max.x),
         Math.abs(boundingBox.min.x),
         Math.abs(boundingBox.max.y),
-        Math.abs(boundingBox.min.y)
+        Math.abs(boundingBox.min.y),
       ) * 2;
 
     const size = Math.ceil(maxDimension * GRID_PADDING_FACTOR);
@@ -334,12 +332,12 @@ export class RenderService {
 
   createMesh = (
     dataItem: string,
-    settings?: MeshMaterialSettings
+    settings?: MeshMaterialSettings,
   ): Promise<Mesh> => {
     return new Promise((resolve) => {
       const geometry = this.parseGeometry(dataItem);
       const material = RenderService.getMaterial(
-        this.getMaterialSettings(settings)
+        this.getMaterialSettings(settings),
       );
 
       // Center the geometry to origin (0,0,0) before creating the mesh
@@ -355,13 +353,13 @@ export class RenderService {
 
   private parseGeometry = (dataItem: string) => {
     const geometry = this.loader.parse(
-      ContentService.base64ToArrayBuffer(dataItem)
+      ContentService.base64ToArrayBuffer(dataItem),
     );
     return geometry;
   };
 
   public getMaterialSettings = (
-    config?: Partial<MeshMaterialSettings>
+    config?: Partial<MeshMaterialSettings>,
   ): MeshMaterialSettings => {
     return {
       ...this.settings.meshMaterial,
@@ -401,8 +399,8 @@ export class RenderService {
             Math.abs(boundingBox.max.x),
             Math.abs(boundingBox.min.x),
             Math.abs(boundingBox.max.y),
-            Math.abs(boundingBox.min.y)
-          ) / 5
+            Math.abs(boundingBox.min.y),
+          ) / 5,
         ) * 10;
 
       const axesHelper = new AxesHelper(size);

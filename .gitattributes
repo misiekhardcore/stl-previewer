@@ -1,0 +1,5 @@
+# STL files are binary and should be treated as such
+*.stl binary
+
+# Enable Git LFS for large STL files (optional - uncomment if using LFS)
+# *.stl filter=lfs diff=lfs merge=lfs -text

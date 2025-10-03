@@ -16,29 +16,33 @@ This guide provides detailed instructions on how to use STL Previewer effectivel
 ## Opening STL Files
 
 ### Method 1: Direct Open
+
 1. Navigate to any `.stl` file in VS Code
 2. Click on the file to open it
 3. The file will automatically open in the STL Previewer
 
 ### Method 2: Open With
+
 1. Right-click on an `.stl` file
 2. Select "Open With..."
 3. Choose "STL Previewer"
 
 ### Method 3: Default Editor
+
 STL Previewer is set as the default editor for `.stl` files, so simply clicking any STL file will open it in the previewer.
 
 ## Navigation Controls
 
 ### Mouse Controls
 
-| Action | Control |
-|--------|---------|
-| **Rotate View** | Left Click + Drag |
-| **Pan View** | Right Click + Drag |
+| Action          | Control             |
+| --------------- | ------------------- |
+| **Rotate View** | Left Click + Drag   |
+| **Pan View**    | Right Click + Drag  |
 | **Zoom In/Out** | Mouse Wheel Up/Down |
 
 ### Touch Controls (Touchscreen)
+
 - **Rotate**: Single finger drag
 - **Pan**: Two finger drag
 - **Zoom**: Pinch gesture
@@ -72,6 +76,7 @@ The `stlPreviewer.viewOffset` setting controls how far the camera is positioned 
 The floor grid helps visualize the object's position in 3D space.
 
 **Enable/Disable:**
+
 ```json
 {
   "stlPreviewer.showGrid": true
@@ -79,6 +84,7 @@ The floor grid helps visualize the object's position in 3D space.
 ```
 
 **Customize Color:**
+
 ```json
 {
   "stlPreviewer.gridColor": "#333333"
@@ -120,6 +126,7 @@ Shows detailed information about the camera and object.
 ```
 
 **Information Displayed:**
+
 - Camera position (x, y, z)
 - Camera rotation (x, y, z)
 - Bounding box dimensions (width, length, height)
@@ -132,12 +139,14 @@ STL Previewer can visualize changes between different versions of an STL file.
 ### How to View Diffs
 
 #### Method 1: Source Control Panel
+
 1. Open the Source Control view (`Ctrl+Shift+G`)
 2. Find a modified `.stl` file in the changes list
 3. Click on the file
 4. The diff will be displayed with color coding
 
 #### Method 2: Git Command Line
+
 ```bash
 # View changes in working tree
 git diff filename.stl
@@ -151,11 +160,11 @@ git diff commit1 commit2 -- filename.stl
 
 ### Understanding Diff Colors
 
-| Color | Meaning |
-|-------|---------|
-| 🟢 **Green** | Geometry added in the new version |
-| 🔴 **Red** | Geometry removed from the old version |
-| 🔵 **Blue** | Geometry that appears in both versions (intersection) |
+| Color        | Meaning                                               |
+| ------------ | ----------------------------------------------------- |
+| 🟢 **Green** | Geometry added in the new version                     |
+| 🔴 **Red**   | Geometry removed from the old version                 |
+| 🔵 **Blue**  | Geometry that appears in both versions (intersection) |
 
 ### Diff View Opacity
 
@@ -163,103 +172,24 @@ When viewing diffs, the added and removed geometry is rendered with semi-transpa
 
 ## Material Configuration
 
-### Available Material Types
-
-#### Lambert (Default)
-Matte surface with diffuse reflection, good for general viewing.
-
-```json
-{
-  "stlPreviewer.meshMaterialType": "lambert"
-}
-```
-
-#### Phong
-Shiny surface with specular highlights, good for plastic/metal objects.
-
-```json
-{
-  "stlPreviewer.meshMaterialType": "phong",
-  "stlPreviewer.meshMaterialConfig": {
-    "shininess": 30,
-    "specular": "#ffffff"
-  }
-}
-```
-
-#### Standard
-PBR (Physically Based Rendering) material for realistic rendering.
-
-```json
-{
-  "stlPreviewer.meshMaterialType": "standard",
-  "stlPreviewer.meshMaterialConfig": {
-    "roughness": 0.5,
-    "metalness": 0.1
-  }
-}
-```
-
-#### Basic
-Simple flat shading without lighting effects.
-
-```json
-{
-  "stlPreviewer.meshMaterialType": "basic"
-}
-```
-
-#### Normal
-Debug view showing surface normals as colors (useful for checking geometry).
-
-```json
-{
-  "stlPreviewer.meshMaterialType": "normal"
-}
-```
-
-### Custom Material Properties
-
-You can pass any valid Three.js material properties in `meshMaterialConfig`:
-
-```json
-{
-  "stlPreviewer.meshMaterialConfig": {
-    "color": "#ff6600",
-    "wireframe": false,
-    "flatShading": false,
-    "opacity": 1.0,
-    "transparent": false,
-    "side": 2,
-    "shininess": 50,
-    "specular": "#cccccc"
-  }
-}
-```
-
-Common properties:
-- `color`: Hex color string (e.g., "#ff0000")
-- `wireframe`: Show only edges (boolean)
-- `flatShading`: Flat vs smooth shading (boolean)
-- `opacity`: 0.0 to 1.0
-- `transparent`: Enable transparency (boolean)
-- `side`: 0=front, 1=back, 2=both
+For detailed material configuration options, types, and examples, see the [Material Settings section in Configuration Guide](CONFIGURATION.md#material-settings).
 
 ## Keyboard Shortcuts
 
 While the STL Previewer is focused, standard VS Code shortcuts work:
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+W` / `Cmd+W` | Close previewer |
-| `Ctrl+K Z` / `Cmd+K Z` | Toggle Zen mode |
-| `F11` | Toggle full screen |
+| Shortcut               | Action             |
+| ---------------------- | ------------------ |
+| `Ctrl+W` / `Cmd+W`     | Close previewer    |
+| `Ctrl+K Z` / `Cmd+K Z` | Toggle Zen mode    |
+| `F11`                  | Toggle full screen |
 
 ## Tips and Tricks
 
 ### Performance Optimization
 
 For very large STL files:
+
 1. Use "basic" material type for faster rendering
 2. Disable grid, axes, and bounding box
 3. Disable info box updates
@@ -268,6 +198,7 @@ For very large STL files:
 ### Debug Information
 
 Enable the info box to:
+
 - Verify object dimensions
 - Check camera position for screenshots
 - Ensure object is properly centered
@@ -282,6 +213,7 @@ Enable the info box to:
 ### Working with Multiple Files
 
 You can open multiple STL files side by side:
+
 1. Open first STL file
 2. Right-click second STL file
 3. Select "Open to the Side"
@@ -289,6 +221,7 @@ You can open multiple STL files side by side:
 ### Comparing Files Manually
 
 To compare two different STL files (not Git versions):
+
 1. Open both files side by side
 2. Use the same view angle for both
 3. Toggle display options to match
@@ -319,26 +252,7 @@ Create a test configuration to quickly try different materials:
 
 ## Troubleshooting
 
-### File Won't Open
-- Verify the file is a valid STL file (ASCII or Binary format)
-- Check file size (very large files may take time to load)
-- Look for errors in the Developer Console (Help > Toggle Developer Tools)
-
-### Rendering Issues
-- Try switching to "basic" material type
-- Disable all display options (grid, axes, bounding box)
-- Restart VS Code
-
-### Diff Not Showing
-- Ensure the Git extension is enabled
-- Verify the file has actual changes
-- Check that the file is tracked by Git
-
-### Performance Issues
-- Close unnecessary extensions
-- Use a simpler material type
-- Disable real-time info box updates
-- Consider splitting very large models
+For comprehensive troubleshooting information, see the [Troubleshooting Guide](TROUBLESHOOTING.md).
 
 ## Next Steps
 

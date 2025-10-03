@@ -31,11 +31,9 @@ export function InfoBox({ camera, mesh }: InfoBoxProps) {
       bounding_box_max_z: boundingBox.max.z,
     };
 
-    const debugValues = Object.entries(debugData).map(
-      ([key, value]) => {
-        return `${key}: ${roundDecimals(value)}`;
-      }
-    );
+    const debugValues = Object.entries(debugData).map(([key, value]) => {
+      return `${key}: ${roundDecimals(value)}`;
+    });
 
     setDebugValues(debugValues);
 

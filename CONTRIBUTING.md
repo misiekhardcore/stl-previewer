@@ -14,17 +14,20 @@ Thank you for your interest in contributing to STL Previewer! This document prov
 ### Setting Up Development Environment
 
 1. **Fork and Clone**
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/stl-previewer.git
    cd stl-previewer
    ```
 
 2. **Install Dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Build the Extension**
+
    ```bash
    npm run compile
    ```
@@ -38,24 +41,9 @@ Thank you for your interest in contributing to STL Previewer! This document prov
 
 ### Project Structure
 
-```
-stl-previewer/
-├── src/                    # Extension source code
-│   ├── extension.ts        # Extension entry point
-│   ├── preview.ts          # Preview manager
-│   ├── render-service.ts   # Three.js rendering logic
-│   ├── csg-service.ts      # CSG operations for diff
-│   ├── media/              # Webview UI components
-│   │   ├── App.tsx         # Main React app
-│   │   ├── controls.tsx    # View control buttons
-│   │   ├── info-box.tsx    # Debug info display
-│   │   └── index.css       # Webview styles
-│   └── types/              # TypeScript type definitions
-├── exampleFiles/           # Sample STL files for testing
-├── demo/                   # Screenshots and demo files
-├── icons/                  # Extension icons
-└── dist/                   # Compiled output (generated)
-```
+The project follows a standard VS Code extension structure with TypeScript source code in `src/` and compiled output in `dist/`. Key components include the extension entry point, preview manager, rendering services, and React-based webview UI.
+
+For detailed project information, see the [README](../README.md).
 
 ### Available Scripts
 
@@ -101,35 +89,41 @@ Feature requests are welcome! Please include:
 ## 🔧 Pull Request Process
 
 1. **Create a Feature Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
 2. **Make Your Changes**
+
    - Write clear, concise commit messages
    - Follow existing code style and patterns
    - Add/update tests if applicable
    - Update documentation if needed
 
 3. **Test Your Changes**
+
    - Test in the Extension Development Host
    - Verify with different STL files
    - Check for console errors
    - Test relevant features
 
 4. **Lint and Build**
+
    ```bash
    npm run lint
    npm run compile
    ```
 
 5. **Commit Your Changes**
+
    ```bash
    git add .
    git commit -m "feat: add amazing feature"
    ```
-   
+
    Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
    - `feat:` - New feature
    - `fix:` - Bug fix
    - `docs:` - Documentation changes
@@ -169,23 +163,21 @@ Use files from `exampleFiles/` directory or create simple test STL files.
 
 ## 📚 Resources
 
-### Three.js Documentation
-- [Three.js Docs](https://threejs.org/docs/)
-- [Three.js Examples](https://threejs.org/examples/)
+### Development Resources
 
-### VS Code Extension Development
+- [Three.js Documentation](https://threejs.org/docs/)
 - [VS Code Extension API](https://code.visualstudio.com/api)
 - [Webview API](https://code.visualstudio.com/api/extension-guides/webview)
-- [Custom Editors](https://code.visualstudio.com/api/extension-guides/custom-editors)
-
-### CSG Operations
 - [three-bvh-csg](https://github.com/gkjohnson/three-bvh-csg)
+
+For more resources and external links, see the [External Resources section in README](../README.md#-external-resources).
 
 ## 🎯 Areas for Contribution
 
 Looking for ways to contribute? Here are some ideas:
 
 ### Features
+
 - Support for additional 3D file formats
 - Measurement tools
 - Export rendered views as images
@@ -194,6 +186,7 @@ Looking for ways to contribute? Here are some ideas:
 - Texture support
 
 ### Improvements
+
 - Performance optimization for large files
 - Better error handling and user feedback
 - Improved UI/UX
@@ -201,12 +194,14 @@ Looking for ways to contribute? Here are some ideas:
 - Internationalization (i18n)
 
 ### Documentation
+
 - Tutorial videos
 - More examples
 - API documentation
 - Better inline code documentation
 
 ### Testing
+
 - Unit tests
 - Integration tests
 - Test coverage improvements
@@ -222,6 +217,7 @@ Your contributions help make STL Previewer better for everyone. We appreciate yo
 ## ❓ Questions?
 
 If you have questions, feel free to:
+
 - Open a discussion on GitHub
 - Create an issue with the "question" label
 - Check existing issues and discussions

@@ -4,29 +4,23 @@ Get up and running with STL Previewer in 5 minutes!
 
 ## Installation
 
-**Option 1: VS Code Marketplace**
-1. Open VS Code
-2. Press `Ctrl+P` (Windows/Linux) or `Cmd+P` (Mac)
-3. Type: `ext install misiekhardcore.stl-previewer`
-4. Press Enter
-
-**Option 2: Extensions Panel**
-1. Open Extensions (`Ctrl+Shift+X`)
-2. Search for "STL Previewer"
-3. Click Install
+See the [Installation Guide](../README.md#-installation) for detailed installation instructions.
 
 ## First Steps
 
 ### 1. Open an STL File
+
 - Click any `.stl` file in your workspace
 - The file opens automatically in the 3D viewer
 
 ### 2. Navigate the View
+
 - **Rotate**: Left click + drag
-- **Pan**: Right click + drag  
+- **Pan**: Right click + drag
 - **Zoom**: Mouse wheel
 
 ### 3. Try Quick Views
+
 - Look for buttons in top-right corner
 - Click "Isometric", "Top", "Left", etc.
 - These provide preset camera angles
@@ -34,39 +28,22 @@ Get up and running with STL Previewer in 5 minutes!
 ## Common Tasks
 
 ### View a Model with Grid
-```json
-{
-  "stlPreviewer.showGrid": true,
-  "stlPreviewer.gridColor": "#333"
-}
-```
+
+See the [Configuration Guide](CONFIGURATION.md#grid-settings) for grid configuration options.
 
 ### See Object Dimensions
-```json
-{
-  "stlPreviewer.showInfo": true,
-  "stlPreviewer.showBoundingBox": true
-}
-```
+
+See the [Configuration Guide](CONFIGURATION.md#show-info-box) for info box configuration.
 
 ### Compare File Versions (Git)
+
 1. Open Source Control (`Ctrl+Shift+G`)
 2. Click on modified `.stl` file
-3. See color-coded differences:
-   - 🟢 Green = Added
-   - 🔴 Red = Removed
-   - 🔵 Blue = Unchanged
+3. See the [Git Diff section in Usage Guide](USAGE.md#understanding-diff-colors) for detailed color explanations.
 
 ### Change Material Style
-```json
-{
-  "stlPreviewer.meshMaterialType": "phong",
-  "stlPreviewer.meshMaterialConfig": {
-    "shininess": 80,
-    "color": "#808080"
-  }
-}
-```
+
+See the [Material Settings section in Configuration Guide](CONFIGURATION.md#material-settings) for detailed material options.
 
 ## Tips
 
@@ -84,45 +61,16 @@ Get up and running with STL Previewer in 5 minutes!
 
 ## Keyboard Reference
 
-| Action | Shortcut |
-|--------|----------|
-| Close viewer | `Ctrl+W` / `Cmd+W` |
-| Source Control | `Ctrl+Shift+G` |
-| Command Palette | `Ctrl+Shift+P` |
-| Settings | `Ctrl+,` |
+| Action          | Shortcut           |
+| --------------- | ------------------ |
+| Close viewer    | `Ctrl+W` / `Cmd+W` |
+| Source Control  | `Ctrl+Shift+G`     |
+| Command Palette | `Ctrl+Shift+P`     |
+| Settings        | `Ctrl+,`           |
 
 ## Common Settings
 
-**Minimal (Performance)**
-```json
-{
-  "stlPreviewer.showGrid": false,
-  "stlPreviewer.showViewButtons": false,
-  "stlPreviewer.meshMaterialType": "basic"
-}
-```
-
-**Debug Mode**
-```json
-{
-  "stlPreviewer.showInfo": true,
-  "stlPreviewer.showAxes": true,
-  "stlPreviewer.showBoundingBox": true
-}
-```
-
-**Presentation**
-```json
-{
-  "stlPreviewer.showGrid": true,
-  "stlPreviewer.gridColor": "#000",
-  "stlPreviewer.meshMaterialType": "phong",
-  "stlPreviewer.meshMaterialConfig": {
-    "color": "#4080ff",
-    "shininess": 80
-  }
-}
-```
+See the [Configuration Examples section in Configuration Guide](CONFIGURATION.md#configuration-examples) for ready-to-use configuration presets.
 
 ## Need Help?
 

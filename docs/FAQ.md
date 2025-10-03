@@ -20,6 +20,7 @@ STL Previewer is a VS Code extension that lets you view and compare 3D STL (Ster
 ### What file formats are supported?
 
 Currently, STL Previewer supports:
+
 - **STL (Binary format)** - Most common, more compact
 - **STL (ASCII format)** - Text-based, human-readable
 
@@ -32,7 +33,6 @@ Yes! STL Previewer is completely free and open-source under the MIT license.
 ### Where can I get it?
 
 - **VS Code Marketplace**: [Install from Marketplace](https://marketplace.visualstudio.com/items?itemName=misiekhardcore.stl-previewer)
-- **Open VSX**: [Install from Open VSX](https://open-vsx.org/extension/misiekhardcore/stl-previewer)
 - **GitHub**: [Source code](https://github.com/misiekhardcore/stl-previewer)
 
 ### Who maintains this extension?
@@ -43,12 +43,7 @@ The extension is maintained by [misiekhardcore](https://github.com/misiekhardcor
 
 ### How do I install it?
 
-**Quick install:**
-1. Press `Ctrl+P` in VS Code
-2. Type: `ext install misiekhardcore.stl-previewer`
-3. Press Enter
-
-See the [Installation Guide](../README.md#-installation) for more options.
+See the [Quick Start Guide](QUICK_START.md#installation) for detailed installation instructions.
 
 ### What are the requirements?
 
@@ -60,6 +55,7 @@ See the [Installation Guide](../README.md#-installation) for more options.
 ### Do I need any other software?
 
 No! Everything needed is included in the extension. You don't need:
+
 - ❌ Separate 3D viewer applications
 - ❌ Additional plugins or libraries
 - ❌ CAD software to view files
@@ -75,6 +71,7 @@ The extension is designed for desktop VS Code. Browser support may be limited du
 Just click on any `.stl` file in VS Code. It will automatically open in the STL Previewer.
 
 If it opens in a text editor instead:
+
 1. Right-click the file
 2. Choose "Open With..."
 3. Select "STL Previewer"
@@ -82,16 +79,19 @@ If it opens in a text editor instead:
 ### How do I rotate/zoom the view?
 
 **Mouse controls:**
+
 - **Rotate**: Left-click and drag
 - **Pan**: Right-click and drag
 - **Zoom**: Mouse wheel scroll
 
 **Keyboard:**
+
 - Use preset view buttons for standard angles
 
 ### Can I take screenshots?
 
 Yes! Position your view as desired, then:
+
 - **VS Code**: Use external screenshot tools
 - **Windows**: Snipping Tool or Win+Shift+S
 - **macOS**: Cmd+Shift+4
@@ -100,6 +100,7 @@ Yes! Position your view as desired, then:
 ### How do I measure dimensions?
 
 Enable the info panel to see bounding box dimensions:
+
 ```json
 {
   "stlPreviewer.showInfo": true,
@@ -112,6 +113,7 @@ The info panel shows width, length, and height in the file's original units.
 ### Can I edit STL files?
 
 No, STL Previewer is a viewer only. For editing, you'll need:
+
 - CAD software (Fusion 360, SolidWorks, FreeCAD, etc.)
 - Mesh editors (Blender, MeshLab, etc.)
 
@@ -136,6 +138,7 @@ STL files don't contain color information - they only store geometry. The extens
 ### How does Git diff work for STL files?
 
 STL Previewer uses Constructive Solid Geometry (CSG) to calculate geometric differences:
+
 1. Loads both versions (old and new)
 2. Performs 3D boolean operations
 3. Displays results with color coding:
@@ -145,17 +148,14 @@ STL Previewer uses Constructive Solid Geometry (CSG) to calculate geometric diff
 
 ### What do the colors mean in diff view?
 
-| Color | Meaning |
-|-------|---------|
-| 🟢 **Green** | Geometry added in the new version |
-| 🔴 **Red** | Geometry removed from the old version |
-| 🔵 **Blue** | Geometry present in both versions |
+See the [Git Diff section in Usage Guide](USAGE.md#understanding-diff-colors) for detailed color explanations.
 
 ### Why is diff view slow?
 
 CSG operations are computationally intensive, especially for complex models with many triangles. This is normal and expected.
 
 **Tips for faster diff:**
+
 - Simplify models in CAD software before committing
 - Use lower polygon counts where possible
 - Be patient - complex diffs can take 30+ seconds
@@ -163,6 +163,7 @@ CSG operations are computationally intensive, especially for complex models with
 ### Can I compare any two STL files?
 
 The Git diff feature only works with files tracked in Git. To compare arbitrary files:
+
 1. Open both files side-by-side
 2. Use the same viewing angle for both
 3. Compare visually
@@ -170,12 +171,14 @@ The Git diff feature only works with files tracked in Git. To compare arbitrary 
 ### Why doesn't my diff show any changes?
 
 Possible reasons:
+
 - File might not have geometric changes (metadata only)
 - Both versions might be identical
 - File might not be tracked in Git
 - Git extension might not be enabled
 
 Check with:
+
 ```bash
 git diff --stat yourfile.stl
 ```
@@ -185,32 +188,25 @@ git diff --stat yourfile.stl
 ### Why is my file loading slowly?
 
 **Common causes:**
+
 - **Large file size**: Files over 50MB take longer
 - **Complex geometry**: High polygon count increases load time
 - **Multiple features enabled**: Grid, axes, info panel add overhead
 
 **Solutions:**
+
 - Use "basic" material type
 - Disable visual helpers (grid, axes, etc.)
 - Close other heavy extensions
 
 ### How can I improve performance?
 
-**Minimal settings for best performance:**
-```json
-{
-  "stlPreviewer.showGrid": false,
-  "stlPreviewer.showAxes": false,
-  "stlPreviewer.showBoundingBox": false,
-  "stlPreviewer.showInfo": false,
-  "stlPreviewer.showViewButtons": false,
-  "stlPreviewer.meshMaterialType": "basic"
-}
-```
+See the [Performance Optimization section in Usage Guide](USAGE.md#performance-optimization) for detailed performance tips and configuration examples.
 
 ### What's the maximum file size?
 
 There's no hard limit, but:
+
 - **< 10MB**: Fast loading, smooth interaction
 - **10-50MB**: Slower loading, good interaction
 - **50-100MB**: Slow loading, may lag
@@ -219,6 +215,7 @@ There's no hard limit, but:
 ### Why is the viewer laggy?
 
 **Possible causes:**
+
 - Large file size
 - Complex material (Standard/Phong)
 - Too many visual helpers enabled
@@ -226,6 +223,7 @@ There's no hard limit, but:
 - Outdated graphics drivers
 
 **Try:**
+
 - Switch to "basic" material
 - Disable all visual helpers
 - Update graphics drivers
@@ -238,6 +236,7 @@ There's no hard limit, but:
 STL Previewer requires **VS Code 1.52.0 or higher**.
 
 Check your version:
+
 ```
 Help > About
 ```
@@ -245,6 +244,7 @@ Help > About
 ### Does it work on all operating systems?
 
 Yes! Tested on:
+
 - ✅ Windows 10/11
 - ✅ macOS (Intel and Apple Silicon)
 - ✅ Linux (Ubuntu, Fedora, etc.)
@@ -252,6 +252,7 @@ Yes! Tested on:
 ### Does it work with VS Code alternatives?
 
 **Compatibility:**
+
 - ✅ **Visual Studio Code** - Full support
 - ⚠️ **VSCodium** - Should work (untested)
 - ⚠️ **Code - OSS** - Should work (untested)
@@ -260,6 +261,7 @@ Yes! Tested on:
 ### Can I use it with Remote Development?
 
 The extension should work with:
+
 - ✅ **Remote - SSH**
 - ✅ **Remote - Containers**
 - ⚠️ **Remote - WSL** (may have performance issues)
@@ -273,6 +275,7 @@ Yes! The extension works with VS Code Insiders.
 ### Are there any known conflicts?
 
 No known conflicts with other extensions. If you encounter issues:
+
 1. Disable other STL-related extensions
 2. Report the conflict on [GitHub](https://github.com/misiekhardcore/stl-previewer/issues)
 
@@ -281,6 +284,7 @@ No known conflicts with other extensions. If you encounter issues:
 ### Where are settings stored?
 
 Settings can be stored in:
+
 1. **User Settings**: `settings.json` in your user config
 2. **Workspace Settings**: `.vscode/settings.json` in your project
 
@@ -291,6 +295,7 @@ Remove all `stlPreviewer.*` entries from your settings.json, or use the reset bu
 ### Can I have different settings per project?
 
 Yes! Use Workspace Settings:
+
 1. Open Settings (`Ctrl+,`)
 2. Switch to "Workspace" tab
 3. Configure STL Previewer settings
@@ -304,17 +309,12 @@ Yes, if you have Settings Sync enabled in VS Code.
 
 ### Why won't my file open?
 
-See the [Troubleshooting Guide](TROUBLESHOOTING.md#file-loading-issues).
-
-**Quick checks:**
-1. Is it a valid STL file?
-2. Do you have read permissions?
-3. Is the file too large?
-4. Check Developer Console for errors
+See the [Troubleshooting Guide](TROUBLESHOOTING.md#file-loading-issues) for comprehensive solutions.
 
 ### Where can I find error messages?
 
 Open Developer Tools:
+
 ```
 Help > Toggle Developer Tools
 ```
@@ -342,11 +342,13 @@ Check the **Console** tab for error messages.
 ### Can you add support for [format]?
 
 Feature requests are welcome! Open an issue on GitHub with:
+
 - What format you'd like supported
 - Why it would be useful
 - Example files (if possible)
 
 Popular format requests:
+
 - OBJ - Under consideration
 - STEP - Very complex, unlikely
 - 3MF - Under consideration
@@ -354,6 +356,7 @@ Popular format requests:
 ### Can you add [feature]?
 
 We welcome feature suggestions! Please:
+
 1. Check if it's already requested
 2. Open a [new issue](https://github.com/misiekhardcore/stl-previewer/issues/new)
 3. Describe the use case
@@ -362,6 +365,7 @@ We welcome feature suggestions! Please:
 ### How can I contribute?
 
 See the [Contributing Guide](../CONTRIBUTING.md) for details on:
+
 - Setting up development environment
 - Coding guidelines
 - Pull request process
@@ -376,6 +380,7 @@ STL Previewer uses **Three.js** (currently v0.178.0), a popular WebGL-based 3D l
 ### How does CSG diff work?
 
 The extension uses **three-bvh-csg** library to perform:
+
 - Boolean subtraction (for added/removed parts)
 - Boolean intersection (for common parts)
 

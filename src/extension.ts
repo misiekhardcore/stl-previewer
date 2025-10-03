@@ -9,7 +9,7 @@ export function activate(context: vscode.ExtensionContext) {
   const stlPreviewer = new StlPreviewer(
     context.extensionUri,
     gitService,
-    configService
+    configService,
   );
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(
@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
       stlPreviewer,
       {
         supportsMultipleEditorsPerDocument: true,
-      }
-    )
+      },
+    ),
   );
 }

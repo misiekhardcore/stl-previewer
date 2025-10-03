@@ -1,10 +1,5 @@
 import { BufferAttribute, BufferGeometry, Material, Mesh } from "three";
-import {
-  SUBTRACTION,
-  Brush,
-  INTERSECTION,
-  ADDITION,
-} from "three-bvh-csg";
+import { SUBTRACTION, Brush, INTERSECTION, ADDITION } from "three-bvh-csg";
 import { MeshMaterialSettings } from "./types/settings";
 import { RenderService } from "./render-service";
 
@@ -33,7 +28,7 @@ export class CSGService {
   constructor(
     firstMesh: Mesh | null,
     secondMesh: Mesh | null,
-    private readonly meshMaterial: MeshMaterialSettings
+    private readonly meshMaterial: MeshMaterialSettings,
   ) {
     if (!firstMesh && !secondMesh) {
       throw new Error("No solids provided for diff calculation.");
@@ -50,19 +45,13 @@ export class CSGService {
   }
 
   private setUv(geometry: BufferGeometry) {
-    geometry?.setAttribute(
-      "uv",
-      new BufferAttribute(new Float32Array([]), 1)
-    );
+    geometry?.setAttribute("uv", new BufferAttribute(new Float32Array([]), 1));
   }
 
   private async evaluate(
     brush1: Brush,
     brush2: Brush,
-    operation:
-      | typeof ADDITION
-      | typeof SUBTRACTION
-      | typeof INTERSECTION
+    operation: typeof ADDITION | typeof SUBTRACTION | typeof INTERSECTION,
   ): Promise<Brush> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -102,9 +91,7 @@ export class CSGService {
     });
   }
 
-  private async getAddedDiff(
-    material: Material
-  ): Promise<Brush | null> {
+  private async getAddedDiff(material: Material): Promise<Brush | null> {
     if (!this.secondBrush) {
       return null;
     }
@@ -116,14 +103,12 @@ export class CSGService {
     const result = await this.evaluate(
       this.secondBrush,
       this.firstBrush,
-      CSGService.operations.SUBTRACTION
+      CSGService.operations.SUBTRACTION,
     );
     return new Brush(result.geometry, material);
   }
 
-  private async getRemovedDiff(
-    material: Material
-  ): Promise<Brush | null> {
+  private async getRemovedDiff(material: Material): Promise<Brush | null> {
     if (!this.firstBrush) {
       return null;
     }
@@ -135,14 +120,12 @@ export class CSGService {
     const result = await this.evaluate(
       this.firstBrush,
       this.secondBrush,
-      CSGService.operations.SUBTRACTION
+      CSGService.operations.SUBTRACTION,
     );
     return new Brush(result.geometry, material);
   }
 
-  private async getIntersection(
-    material: Material
-  ): Promise<Brush | null> {
+  private async getIntersection(material: Material): Promise<Brush | null> {
     if (!this.firstBrush || !this.secondBrush) {
       return null;
     }
@@ -150,7 +133,7 @@ export class CSGService {
     const result = await this.evaluate(
       this.firstBrush,
       this.secondBrush,
-      CSGService.operations.INTERSECTION
+      CSGService.operations.INTERSECTION,
     );
     return new Brush(result.geometry, material);
   }
@@ -175,7 +158,7 @@ export class CSGService {
     const result = await this.evaluate(
       this.firstBrush,
       this.secondBrush,
-      CSGService.operations.ADDITION
+      CSGService.operations.ADDITION,
     );
     return new Brush(result.geometry, material);
   }
@@ -184,14 +167,14 @@ export class CSGService {
     const opacity = this.hasBothBrushes() ? 0.7 : 1;
     const addedMaterial = this.createColoredMaterial(
       CSGService.colors.ADDED,
-      opacity
+      opacity,
     );
     const removedMaterial = this.createColoredMaterial(
       CSGService.colors.REMOVED,
-      opacity
+      opacity,
     );
     const intersectionMaterial = this.createColoredMaterial(
-      CSGService.colors.INTERSECTION
+      CSGService.colors.INTERSECTION,
     );
     const sumMaterial = RenderService.getMaterial(this.meshMaterial);
 
@@ -205,7 +188,7 @@ export class CSGService {
 
   private createColoredMaterial(
     color: string,
-    opacity: number = 0.7
+    opacity: number = 0.7,
   ): Material {
     return RenderService.getMaterial({
       ...this.meshMaterial,
@@ -223,9 +206,7 @@ export class CSGService {
     const geometry = brush.geometry;
     const attributes: any = {};
 
-    for (const [name, attribute] of Object.entries(
-      geometry.attributes
-    )) {
+    for (const [name, attribute] of Object.entries(geometry.attributes)) {
       attributes[name] = {
         array: Array.from(attribute.array),
         itemSize: attribute.itemSize,
@@ -248,44 +229,37 @@ export class CSGService {
     const geometry = new BufferGeometry();
 
     const positionArray = new Float32Array(
-      brushData.geometry.attributes.position.array
+      brushData.geometry.attributes.position.array,
     );
     geometry.setAttribute(
       "position",
       new BufferAttribute(
         positionArray,
-        brushData.geometry.attributes.position.itemSize
-      )
+        brushData.geometry.attributes.position.itemSize,
+      ),
     );
 
     const normalArray = new Float32Array(
-      brushData.geometry.attributes.normal.array
+      brushData.geometry.attributes.normal.array,
     );
     geometry.setAttribute(
       "normal",
       new BufferAttribute(
         normalArray,
-        brushData.geometry.attributes.normal.itemSize
-      )
+        brushData.geometry.attributes.normal.itemSize,
+      ),
     );
 
     if (brushData.geometry.attributes.uv) {
-      const uvArray = new Float32Array(
-        brushData.geometry.attributes.uv.array
-      );
+      const uvArray = new Float32Array(brushData.geometry.attributes.uv.array);
       geometry.setAttribute(
         "uv",
-        new BufferAttribute(
-          uvArray,
-          brushData.geometry.attributes.uv.itemSize
-        )
+        new BufferAttribute(uvArray, brushData.geometry.attributes.uv.itemSize),
       );
     }
 
     if (brushData.geometry.index) {
-      const indexArray = new Uint16Array(
-        brushData.geometry.index.array
-      );
+      const indexArray = new Uint16Array(brushData.geometry.index.array);
       geometry.setIndex(new BufferAttribute(indexArray, 1));
     }
 

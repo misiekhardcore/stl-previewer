@@ -15,11 +15,13 @@ This guide explains all available configuration options for STL Previewer.
 ## Accessing Settings
 
 ### Via VS Code Settings UI
+
 1. Open Settings: `File > Preferences > Settings` (or `Ctrl+,`)
 2. Search for "STL Previewer"
 3. Modify settings as needed
 
 ### Via settings.json
+
 1. Open Command Palette: `Ctrl+Shift+P`
 2. Type "Preferences: Open Settings (JSON)"
 3. Add STL Previewer settings
@@ -41,10 +43,9 @@ Controls whether camera position control buttons are displayed.
 - **Description**: When enabled, shows buttons in the top-right corner for quick camera positioning (Isometric, Top, Left, Right, Bottom views)
 
 **Use Cases:**
+
 - Enable for quick navigation between standard views
 - Disable for a cleaner interface or when you prefer manual camera control
-
----
 
 ### Show Info Box
 
@@ -61,17 +62,17 @@ Controls whether the debug information panel is displayed.
 - **Description**: When enabled, shows a panel with real-time camera position, rotation, and object bounding box information
 
 **Information Displayed:**
+
 - Camera X, Y, Z position
 - Camera X, Y, Z rotation
 - Bounding box width, length, height
 - Bounding box min/max coordinates
 
 **Use Cases:**
+
 - Enable for debugging or precision work
 - Enable when you need exact measurements
 - Disable for cleaner viewing experience
-
----
 
 ### Show Axes
 
@@ -88,16 +89,16 @@ Controls whether the axes helper is displayed.
 - **Description**: Shows X, Y, Z coordinate axes at the origin
 
 **Axes Colors:**
+
 - Red = X axis
 - Green = Y axis
 - Blue = Z axis
 
 **Use Cases:**
+
 - Enable to understand object orientation
 - Enable when teaching/learning 3D concepts
 - Enable for debugging coordinate systems
-
----
 
 ### Show Bounding Box
 
@@ -114,11 +115,10 @@ Controls whether the object's bounding box is displayed.
 - **Description**: Shows a yellow wireframe box around the object representing its boundaries
 
 **Use Cases:**
+
 - Enable to see object dimensions at a glance
 - Enable to verify object positioning
 - Enable for collision detection visualization
-
----
 
 ### Show Grid
 
@@ -135,6 +135,7 @@ Controls whether the floor grid is displayed.
 - **Description**: Shows a grid on the ground plane for spatial reference
 
 **Use Cases:**
+
 - Enable for better depth perception
 - Enable to understand object position relative to ground
 - Disable for cleaner screenshots or presentations
@@ -156,11 +157,13 @@ Controls the distance of the camera from the object in preset views.
 - **Description**: Distance multiplier for preset camera positions
 
 **How it works:**
+
 - Larger values = camera further away (wider view)
 - Smaller values = camera closer (tighter view)
 - Only affects preset view buttons, not manual camera control
 
 **Recommended Values:**
+
 - Small objects: 20-30
 - Medium objects: 30-50
 - Large objects: 50-100
@@ -184,37 +187,57 @@ Controls the rendering material type for the 3D object.
 
 #### Material Type Details
 
-**basic**
-- Simple flat color
-- No lighting effects
-- Fastest rendering
-- Good for: Performance, simple visualization
+**Basic Material**
 
-**lambert**
-- Matte surface
-- Diffuse reflection
-- Good general-purpose material
-- Good for: Most objects, general viewing
+- Flat shading without lighting effects
+- Fastest rendering performance
+- Good for large files or performance-critical scenarios
 
-**phong**
-- Shiny surface
-- Specular highlights
-- Good for: Plastic, metal objects
+**Lambert Material (Default)**
 
-**standard**
-- PBR (Physically Based Rendering)
-- Most realistic rendering
-- Slower performance
-- Good for: High-quality visualization, realistic materials
+- Matte surface with diffuse reflection
+- Good for general viewing
+- Low computational cost
+- No specular highlights
 
-**normal**
-- Surface normals as colors
-- Debug visualization
-- Good for: Checking geometry, debugging
+**Phong Material**
 
----
+- Shiny surface with specular highlights
+- Good for plastics, metals, and reflective surfaces
+- Moderate computational cost
+- Configurable shininess and specular properties
+
+**Standard Material (PBR)**
+
+- Physically Based Rendering
+- Most realistic material appearance
+- High computational cost
+- Roughness and metalness controls
+
+**Normal Material**
+
+- Debug view showing surface normals as colors
+- Useful for checking geometry and debugging
+- RGB colors represent XYZ directions
 
 ### Mesh Material Config
+
+You can pass any valid Three.js material properties in `meshMaterialConfig`:
+
+```json
+{
+  "stlPreviewer.meshMaterialConfig": {
+    "color": "#ff6600",
+    "wireframe": false,
+    "flatShading": false,
+    "opacity": 1.0,
+    "transparent": false,
+    "side": 2,
+    "shininess": 50,
+    "specular": "#cccccc"
+  }
+}
+```
 
 Advanced material configuration using Three.js material properties.
 
@@ -231,6 +254,7 @@ Advanced material configuration using Three.js material properties.
 #### Common Properties
 
 **Color**
+
 ```json
 {
   "stlPreviewer.meshMaterialConfig": {
@@ -240,6 +264,7 @@ Advanced material configuration using Three.js material properties.
 ```
 
 **Wireframe**
+
 ```json
 {
   "stlPreviewer.meshMaterialConfig": {
@@ -249,6 +274,7 @@ Advanced material configuration using Three.js material properties.
 ```
 
 **Transparency**
+
 ```json
 {
   "stlPreviewer.meshMaterialConfig": {
@@ -259,6 +285,7 @@ Advanced material configuration using Three.js material properties.
 ```
 
 **Phong Material**
+
 ```json
 {
   "stlPreviewer.meshMaterialType": "phong",
@@ -271,6 +298,7 @@ Advanced material configuration using Three.js material properties.
 ```
 
 **Standard Material (PBR)**
+
 ```json
 {
   "stlPreviewer.meshMaterialType": "standard",
@@ -285,6 +313,7 @@ Advanced material configuration using Three.js material properties.
 #### Available Properties by Material Type
 
 **Basic Material**
+
 - `color`: Color (hex string)
 - `wireframe`: Boolean
 - `opacity`: Number (0-1)
@@ -292,6 +321,7 @@ Advanced material configuration using Three.js material properties.
 - `side`: Number (0=front, 1=back, 2=both)
 
 **Lambert Material**
+
 - `color`: Color (hex string)
 - `emissive`: Color (hex string)
 - `wireframe`: Boolean
@@ -299,6 +329,7 @@ Advanced material configuration using Three.js material properties.
 - `transparent`: Boolean
 
 **Phong Material**
+
 - `color`: Color (hex string)
 - `emissive`: Color (hex string)
 - `specular`: Color (hex string)
@@ -308,6 +339,7 @@ Advanced material configuration using Three.js material properties.
 - `transparent`: Boolean
 
 **Standard Material**
+
 - `color`: Color (hex string)
 - `roughness`: Number (0-1)
 - `metalness`: Number (0-1)
@@ -333,6 +365,7 @@ Controls the color of the floor grid.
 - **Description**: Hex color code for the grid
 
 **Recommended Colors:**
+
 - Dark theme: `"#333"`, `"#444"`, `"#555"`
 - Light theme: `"#ccc"`, `"#ddd"`, `"#eee"`
 - Custom: Any valid hex color code
@@ -427,38 +460,3 @@ Controls the color of the floor grid.
   "stlPreviewer.viewOffset": 50
 }
 ```
-
-## Workspace vs User Settings
-
-### User Settings
-Settings applied to all VS Code workspaces.
-
-**Access:** `File > Preferences > Settings` → Select "User" tab
-
-### Workspace Settings
-Settings specific to the current workspace/project.
-
-**Access:** `File > Preferences > Settings` → Select "Workspace" tab
-
-**Use Cases:**
-- Set different material types per project
-- Configure display options per workspace
-- Team-specific configurations (commit `.vscode/settings.json`)
-
-## Best Practices
-
-1. **Start with Defaults**: Only change settings you need
-2. **Use Workspace Settings**: For project-specific configurations
-3. **Document Custom Configs**: Add comments in settings.json
-4. **Test Materials**: Try different materials for your specific models
-5. **Performance First**: Disable features you don't need for better performance
-
-## Resetting to Defaults
-
-To reset all settings to defaults, remove all `stlPreviewer.*` entries from your settings.json or use the settings UI reset button.
-
-## Related Documentation
-
-- [Usage Guide](USAGE.md) - How to use the extension
-- [CONTRIBUTING.md](../CONTRIBUTING.md) - Development setup
-- [README.md](../README.md) - Overview and features

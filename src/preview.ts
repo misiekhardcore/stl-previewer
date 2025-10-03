@@ -24,7 +24,7 @@ export class Preview extends Disposable {
     private readonly fileUri: Uri,
     private readonly webviewPanel: WebviewPanel,
     private readonly gitService: GitService,
-    private readonly configService: SettingsService
+    private readonly configService: SettingsService,
   ) {
     super();
     const resourceRoot = fileUri.with({
@@ -43,17 +43,17 @@ export class Preview extends Disposable {
     this._register(
       webviewPanel.onDidChangeViewState(() => {
         this.update();
-      })
+      }),
     );
 
     this._register(
       webviewPanel.onDidDispose(() => {
         this._previewState = PreviewState.Disposed;
-      })
+      }),
     );
 
     const watcher = this._register(
-      workspace.createFileSystemWatcher(fileUri.fsPath)
+      workspace.createFileSystemWatcher(fileUri.fsPath),
     );
 
     this._register(
@@ -61,7 +61,7 @@ export class Preview extends Disposable {
         if (e.toString() === this.fileUri.toString()) {
           this.render();
         }
-      })
+      }),
     );
 
     this._register(
@@ -69,7 +69,7 @@ export class Preview extends Disposable {
         if (e.toString() === this.fileUri.toString()) {
           this.webviewPanel.dispose();
         }
-      })
+      }),
     );
 
     workspace.fs.stat(this.fileUri).then(() => {
@@ -147,9 +147,7 @@ export class Preview extends Disposable {
   };
 
   private getPrevFileContent = async (uri: Uri): Promise<string> => {
-    return (await this.gitService.getPrevFileContent(uri)).toString(
-      "base64"
-    );
+    return (await this.gitService.getPrevFileContent(uri)).toString("base64");
   };
 
   private getWebviewContents = async (): Promise<string> => {
@@ -167,10 +165,10 @@ export class Preview extends Disposable {
 	<title>STL Preview</title>
 	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: ${cspSource}; script-src 'nonce-${nonce}' 'unsafe-eval'; style-src ${cspSource} 'nonce-${nonce}'; connect-src https:; worker-src data: blob:;">
 	<meta id="settings" data-settings="${ContentService.escapeAttribute(
-    ContentService.stringify(previewData)
+    ContentService.stringify(previewData),
   )}">
   <link rel="stylesheet" type="text/css" href="${ContentService.escapeAttribute(
-    this.getResourceUri(Preview.CSS_PATH)
+    this.getResourceUri(Preview.CSS_PATH),
   )}">
 </head>
 <body>
@@ -180,7 +178,7 @@ export class Preview extends Disposable {
     window.CSG_WORKER_URL = "${workerDataUrl}";
   </script>
 	<script type="module" src="${ContentService.escapeAttribute(
-    this.getResourceUri(Preview.JS_PATH)
+    this.getResourceUri(Preview.JS_PATH),
   )}" nonce="${nonce}"></script>
 </body>
 </html>`;
@@ -190,7 +188,7 @@ export class Preview extends Disposable {
     return this.webviewPanel.webview.asWebviewUri(
       this.extensionRoot.with({
         path: this.extensionRoot.path + path,
-      })
+      }),
     );
   };
 
@@ -199,10 +197,10 @@ export class Preview extends Disposable {
       this.extensionRoot.with({
         path: this.extensionRoot.path + "/dist/media/csg-worker.js",
       }).fsPath,
-      "utf8"
+      "utf8",
     );
     return `data:application/javascript;base64,${Buffer.from(
-      workerContent
+      workerContent,
     ).toString("base64")}`;
   };
 }
